@@ -1,31 +1,35 @@
 # NLS TECH - Kollect Lite Portal
 
 ## Current State
-A legal case management portal with case queue and per-case detail screens. Case detail has tabs: Overview, Litigation, Enforcement, Notices. Overview shows Contact Information, Case Details, Loan Summary cards, plus Upcoming Due Dates and Case Timeline. Litigation has fields for court case number, filing date, court name, summons date, hearing date, case status, and judgement.
+- Legal Queue has filter tabs (All / Active / Notice / Litigation / Enforcement / Closed) above the table
+- OverviewTab shows fields in stacked card blocks, not compact inline rows
+- InvestigationTab fields laid out in a 2-column grid
+- LitigationTab has faint dashed separators between sub-groups inside Suit Details
 
 ## Requested Changes (Diff)
 
 ### Add
-- New "Investigation" tab inserted between Overview and Litigation in the navigation pills
-- InvestigationTab component with the following fields: Product, Account Number, Loan ID, Legal Description, Omniflow Number, Investigator, Document Upload + Description (multi-value: can add multiple document/description pairs), Feedback Description (textarea), Feedback Document Upload
-- New fields in LitigationTab: Suit By, Advocate Instructions (textarea), Advocate, Ground of Suit, Comment (textarea), Witness Name, Witness Email, Follow Up Description (textarea), Document Upload + Description (multi-value)
-- Apply DM Sans (geometric sans-serif) font globally via index.css / tailwind config
-- All label and data text should be rendered in plain black (#000 or near-black) without bold weight
+- KPI cards row at top of Legal Queue: Calls Due (1201, Target: 60), PTPs Today (1, Target: 40), Broken Promises (0, Target: 20), Recovered (Ksh 0, Target: 10,000) — static decorative values, no dataset connection. Each card: icon + label + value on one line, thin blue progress bar, target label below.
+- Dark brown active-tab indicator bar below KPI cards showing "Legal Queue" with an orange × (matching uploaded reference image style)
 
 ### Modify
-- CaseDetail tab list: add Investigation tab between Overview and Litigation
-- OverviewTab: remove the Loan Summary card (third card in the summary row), adjusting the grid from 3 to 2 columns
-- LitigationTab: add grouped new fields with logical sections (Case Parties, Legal Grounds, Witness, Follow Up, Documents)
-- All font usage: swap to DM Sans geometric sans-serif
-- Remove bold styling from data display text; labels remain as uppercase tracking-wide but not bold
+- **CaseQueue.tsx**: Remove the filter pills/tabs row. Replace with KPI cards + Legal Queue active-tab bar described above. Keep search row, table, and all other functionality intact.
+- **OverviewTab.tsx**: Change field layout from stacked card blocks to compact horizontally-inline rows matching the investigation style. Fields should appear as label + value pairs laid out in tight 3-column rows.
+- **InvestigationTab.tsx**: Rearrange fields into specific rows:
+  - Row 1 (3 inline): Product, Account Number, Loan ID
+  - Row 2 (3 inline): Legal ID, Legal Description, Omniflow Number
+  - Row 3 (3 inline): Investigator, Feedback Description, Feedback Upload
+  - Below: Document upload and description section (unchanged multi-value)
+- **LitigationTab.tsx**: 
+  - Display all field groups with 3 fields horizontally inline per row
+  - Remove the faint dashed dividing lines (Separators) inside the Suit Details section
 
 ### Remove
-- Loan Summary card from OverviewTab
+- Filter pills (All / Active / Notice / Litigation / Enforcement / Closed) from CaseQueue
+- Dashed separators between sub-groups in LitigationTab Suit Details section
 
 ## Implementation Plan
-1. Add DM Sans import in index.css and set as default font in tailwind config
-2. Update OverviewTab: remove Loan Summary card, change summary grid to md:grid-cols-2
-3. Create InvestigationTab component (src/frontend/src/components/tabs/InvestigationTab.tsx) with all specified fields including multi-value document upload sections
-4. Update CaseDetail: add Investigation to the TABS array, render InvestigationTab
-5. Update LitigationTab: add new grouped fields (Suit By, Advocate Instructions, Advocate, Ground of Suit, Comment, Witness Name, Witness Email, Follow Up Description, Document Upload+Description multi-value)
-6. Validate build
+1. Update CaseQueue.tsx: remove filter tabs, add KPI cards row + Legal Queue active-tab bar
+2. Update OverviewTab.tsx: compact 3-column inline rows for all field display
+3. Update InvestigationTab.tsx: rearrange into specified 3-column row groups
+4. Update LitigationTab.tsx: 3-inline field layout, remove Suit Details sub-separators

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, Calendar, Clock, FileText, User } from "lucide-react";
+import { AlertCircle, Calendar, Clock } from "lucide-react";
 import {
   useGetCase,
   useGetLitigation,
@@ -275,6 +275,25 @@ const DEFAULT_TIMELINE: TimelineEntry[] = [
   },
 ];
 
+function FieldRow({
+  fields,
+}: { fields: { label: string; value: string; mono?: boolean }[] }) {
+  return (
+    <div className="grid grid-cols-3 gap-x-6 gap-y-0 py-2.5 border-b border-gray-100 last:border-b-0">
+      {fields.map((f) => (
+        <div key={f.label}>
+          <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">
+            {f.label}
+          </p>
+          <p className={`text-sm text-black ${f.mono ? "font-mono" : ""}`}>
+            {f.value || "—"}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function OverviewTab({ caseId }: Props) {
   const { data: caseData, isLoading: caseLoading } = useGetCase(caseId);
   const { data: litigation } = useGetLitigation(caseId);
@@ -323,16 +342,9 @@ export default function OverviewTab({ caseId }: Props) {
 
   if (caseLoading) {
     return (
-      <div className="grid grid-cols-2 gap-5">
-        {["card-a", "card-b"].map((key) => (
-          <Card key={key} className="bg-white border-border">
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
-          </Card>
+      <div className="space-y-3">
+        {["a", "b"].map((k) => (
+          <Skeleton key={k} className="h-24 w-full rounded-md" />
         ))}
       </div>
     );
@@ -351,99 +363,40 @@ export default function OverviewTab({ caseId }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Contact Information */}
-        <Card className="bg-white border-border shadow-sm">
-          <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
-              <User className="w-4 h-4 text-primary" />
-              Contact Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            <div className="flex flex-col gap-0.5 py-2 border-b border-border/50">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Customer Name
-              </span>
-              <span className="text-sm text-black">
-                {caseData.customerName || "—"}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5 py-2 border-b border-border/50">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Mobile Number
-              </span>
-              <span className="text-sm text-black">
-                {caseData.mobileNumber || "—"}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5 py-2">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Customer Number
-              </span>
-              <span className="text-sm font-mono text-black">
-                {caseData.customerNumber || "—"}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Case Details */}
-        <Card className="bg-white border-border shadow-sm">
-          <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
-              <FileText className="w-4 h-4 text-primary" />
-              Case Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3 px-4">
-            <div className="grid grid-cols-2 gap-4 pb-3">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Date Assigned
-                </p>
-                <p className="text-sm text-black">{dateAssigned}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Last Updated
-                </p>
-                <p className="text-sm text-black">{lastUpdated}</p>
-              </div>
-            </div>
-            <Separator className="my-1 bg-border/60" />
-            <div className="grid grid-cols-3 gap-2 pt-3">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Loan Amt
-                </p>
-                <p className="text-sm text-black">
-                  {formatCurrency(loanAmount)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Outstanding
-                </p>
-                <p className="text-sm text-black">
-                  {formatCurrency(caseData.outstandingBalance)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                  Days Past Due
-                </p>
-                <p
-                  className={`text-sm ${daysPastDue > 0 ? "text-red-600" : "text-green-600"}`}
-                >
-                  {daysPastDue > 0 ? daysPastDue : "—"}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-5">
+      {/* Compact summary — inline field rows */}
+      <div className="bg-white border border-gray-200 rounded-md px-4 py-2">
+        <FieldRow
+          fields={[
+            { label: "Customer Name", value: caseData.customerName },
+            { label: "Mobile Number", value: caseData.mobileNumber },
+            {
+              label: "Customer Number",
+              value: caseData.customerNumber,
+              mono: true,
+            },
+          ]}
+        />
+        <FieldRow
+          fields={[
+            { label: "Date Assigned", value: dateAssigned },
+            { label: "Last Updated", value: lastUpdated },
+            {
+              label: "Days Past Due",
+              value: daysPastDue > 0 ? String(daysPastDue) : "—",
+            },
+          ]}
+        />
+        <FieldRow
+          fields={[
+            { label: "Loan Amount", value: formatCurrency(loanAmount) },
+            {
+              label: "Outstanding",
+              value: formatCurrency(caseData.outstandingBalance),
+            },
+            { label: "Product", value: caseData.productType ?? "—" },
+          ]}
+        />
       </div>
 
       {/* Bottom panels */}

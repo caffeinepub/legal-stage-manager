@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Gavel, Loader2, Paperclip, Plus, Save, Trash2 } from "lucide-react";
@@ -48,14 +47,11 @@ const JUDGEMENTS: { value: Judgement; label: string }[] = [
 
 const LIT_SKELETON_KEYS = ["a", "b", "c", "d", "e", "f"];
 
-function SectionHeader({ label }: { label: string }) {
+function SectionLabel({ label }: { label: string }) {
   return (
-    <div className="pt-2">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground font-normal mb-3">
-        {label}
-      </p>
-      <Separator className="mb-4" />
-    </div>
+    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-normal mb-3 mt-4 first:mt-0">
+      {label}
+    </p>
   );
 }
 
@@ -71,7 +67,6 @@ export default function LitigationTab({ caseId }: Props) {
     hearingDate: "",
     caseStatus: LitigationStatus.filed,
     judgement: Judgement.none,
-    // new fields
     suitBy: "",
     groundOfSuit: "",
     advocate: "",
@@ -152,7 +147,7 @@ export default function LitigationTab({ caseId }: Props) {
     return (
       <Card className="bg-card border-border">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {LIT_SKELETON_KEYS.map((k) => (
               <div key={k} className="space-y-2">
                 <Skeleton className="h-4 w-24" />
@@ -174,327 +169,319 @@ export default function LitigationTab({ caseId }: Props) {
             Litigation Record
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-5 space-y-6">
+        <CardContent className="pt-4 space-y-3">
           {/* Court Information */}
-          <div>
-            <SectionHeader label="Court Information" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Court Case Number
-                </Label>
-                <Input
-                  value={form.courtCaseNumber}
-                  onChange={(e) => set("courtCaseNumber", e.target.value)}
-                  placeholder="GH/HCC/YYYY/XXXX"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Filing Date
-                </Label>
-                <Input
-                  type="date"
-                  value={form.filingDate}
-                  onChange={(e) => set("filingDate", e.target.value)}
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Court Name / Jurisdiction
-                </Label>
-                <Input
-                  value={form.courtName}
-                  onChange={(e) => set("courtName", e.target.value)}
-                  placeholder="High Court — Commercial Division"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Court Summons Date
-                </Label>
-                <Input
-                  type="date"
-                  value={form.courtSummonsDate}
-                  onChange={(e) => set("courtSummonsDate", e.target.value)}
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Hearing Date
-                </Label>
-                <Input
-                  type="date"
-                  value={form.hearingDate}
-                  onChange={(e) => set("hearingDate", e.target.value)}
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Case Status
-                </Label>
-                <Select
-                  value={form.caseStatus}
-                  onValueChange={(v) => set("caseStatus", v)}
+          <SectionLabel label="Court Information" />
+
+          {/* Row 1: Court Case Number | Filing Date | Court Name */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Court Case Number
+              </Label>
+              <Input
+                value={form.courtCaseNumber}
+                onChange={(e) => set("courtCaseNumber", e.target.value)}
+                placeholder="GH/HCC/YYYY/XXXX"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Filing Date
+              </Label>
+              <Input
+                type="date"
+                value={form.filingDate}
+                onChange={(e) => set("filingDate", e.target.value)}
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Court Name / Jurisdiction
+              </Label>
+              <Input
+                value={form.courtName}
+                onChange={(e) => set("courtName", e.target.value)}
+                placeholder="High Court — Commercial Division"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Court Summons Date | Hearing Date | Case Status */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Court Summons Date
+              </Label>
+              <Input
+                type="date"
+                value={form.courtSummonsDate}
+                onChange={(e) => set("courtSummonsDate", e.target.value)}
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Hearing Date
+              </Label>
+              <Input
+                type="date"
+                value={form.hearingDate}
+                onChange={(e) => set("hearingDate", e.target.value)}
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Case Status
+              </Label>
+              <Select
+                value={form.caseStatus}
+                onValueChange={(v) => set("caseStatus", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-8 text-sm"
+                  data-ocid="litigation.select"
                 >
-                  <SelectTrigger
-                    className="bg-input border-border text-black font-normal"
-                    data-ocid="litigation.select"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {CASE_STATUSES.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Judgement
-                </Label>
-                <Select
-                  value={form.judgement}
-                  onValueChange={(v) => set("judgement", v)}
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {CASE_STATUSES.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Row 3: Judgement (full width or single col) */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1 col-span-2">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Judgement
+              </Label>
+              <Select
+                value={form.judgement}
+                onValueChange={(v) => set("judgement", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-8 text-sm"
+                  data-ocid="litigation.select"
                 >
-                  <SelectTrigger
-                    className="bg-input border-border text-black font-normal"
-                    data-ocid="litigation.select"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {JUDGEMENTS.map((j) => (
-                      <SelectItem key={j.value} value={j.value}>
-                        {j.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {JUDGEMENTS.map((j) => (
+                    <SelectItem key={j.value} value={j.value}>
+                      {j.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Suit Details */}
-          <div>
-            <SectionHeader label="Suit Details" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Suit By
-                </Label>
-                <Input
-                  value={form.suitBy}
-                  onChange={(e) => set("suitBy", e.target.value)}
-                  placeholder="e.g. NLS TECH Ltd"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Ground of Suit
-                </Label>
-                <Input
-                  value={form.groundOfSuit}
-                  onChange={(e) => set("groundOfSuit", e.target.value)}
-                  placeholder="e.g. Non-payment of loan"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
+          <SectionLabel label="Suit Details" />
+
+          {/* Row 1: Suit By | Ground of Suit | Advocate */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Suit By
+              </Label>
+              <Input
+                value={form.suitBy}
+                onChange={(e) => set("suitBy", e.target.value)}
+                placeholder="e.g. NLS TECH Ltd"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Ground of Suit
+              </Label>
+              <Input
+                value={form.groundOfSuit}
+                onChange={(e) => set("groundOfSuit", e.target.value)}
+                placeholder="e.g. Non-payment of loan"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Advocate
+              </Label>
+              <Input
+                value={form.advocate}
+                onChange={(e) => set("advocate", e.target.value)}
+                placeholder="Advocate name"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
             </div>
           </div>
 
-          {/* Advocate */}
-          <div>
-            <SectionHeader label="Advocate" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Advocate
-                </Label>
-                <Input
-                  value={form.advocate}
-                  onChange={(e) => set("advocate", e.target.value)}
-                  placeholder="Advocate name"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Advocate Instructions
-                </Label>
-                <Textarea
-                  value={form.advocateInstructions}
-                  onChange={(e) => set("advocateInstructions", e.target.value)}
-                  placeholder="Instructions to the advocate..."
-                  rows={3}
-                  className="bg-input border-border text-black font-normal resize-none"
-                  data-ocid="litigation.textarea"
-                />
-              </div>
+          {/* Row 2: Advocate Instructions | Witness Name | Witness Email */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Advocate Instructions
+              </Label>
+              <Textarea
+                value={form.advocateInstructions}
+                onChange={(e) => set("advocateInstructions", e.target.value)}
+                placeholder="Instructions to the advocate..."
+                rows={2}
+                className="bg-white border-border text-black font-normal resize-none text-sm"
+                data-ocid="litigation.textarea"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Witness Name
+              </Label>
+              <Input
+                value={form.witnessName}
+                onChange={(e) => set("witnessName", e.target.value)}
+                placeholder="Full name"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Witness Email
+              </Label>
+              <Input
+                type="email"
+                value={form.witnessEmail}
+                onChange={(e) => set("witnessEmail", e.target.value)}
+                placeholder="witness@example.com"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="litigation.input"
+              />
             </div>
           </div>
 
-          {/* Witness */}
-          <div>
-            <SectionHeader label="Witness" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Witness Name
-                </Label>
-                <Input
-                  value={form.witnessName}
-                  onChange={(e) => set("witnessName", e.target.value)}
-                  placeholder="Full name"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Witness Email
-                </Label>
-                <Input
-                  type="email"
-                  value={form.witnessEmail}
-                  onChange={(e) => set("witnessEmail", e.target.value)}
-                  placeholder="witness@example.com"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="litigation.input"
-                />
-              </div>
+          {/* Row 3: Comment | Follow Up Description */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Comment
+              </Label>
+              <Textarea
+                value={form.comment}
+                onChange={(e) => set("comment", e.target.value)}
+                placeholder="Additional comments..."
+                rows={2}
+                className="bg-white border-border text-black font-normal resize-none text-sm"
+                data-ocid="litigation.textarea"
+              />
             </div>
-          </div>
-
-          {/* Follow Up */}
-          <div>
-            <SectionHeader label="Follow Up" />
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Comment
-                </Label>
-                <Textarea
-                  value={form.comment}
-                  onChange={(e) => set("comment", e.target.value)}
-                  placeholder="Additional comments..."
-                  rows={2}
-                  className="bg-input border-border text-black font-normal resize-none"
-                  data-ocid="litigation.textarea"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Follow Up Description
-                </Label>
-                <Textarea
-                  value={form.followUpDescription}
-                  onChange={(e) => set("followUpDescription", e.target.value)}
-                  placeholder="Describe the follow-up actions required..."
-                  rows={3}
-                  className="bg-input border-border text-black font-normal resize-none"
-                  data-ocid="litigation.textarea"
-                />
-              </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Follow Up Description
+              </Label>
+              <Textarea
+                value={form.followUpDescription}
+                onChange={(e) => set("followUpDescription", e.target.value)}
+                placeholder="Describe the follow-up actions required..."
+                rows={2}
+                className="bg-white border-border text-black font-normal resize-none text-sm"
+                data-ocid="litigation.textarea"
+              />
             </div>
           </div>
 
           {/* Documents */}
-          <div>
-            <SectionHeader label="Documents" />
-            <div className="space-y-3">
-              {documents.map((doc, idx) => (
-                <div
-                  key={doc.id}
-                  className="flex items-start gap-3 p-3 rounded-md border border-border/60 bg-secondary/30"
-                >
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                        Document
-                      </Label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="file"
-                          id={`lit-doc-file-${doc.id}`}
-                          className="hidden"
-                          ref={(el) => {
-                            fileInputRefs.current[doc.id] = el;
-                          }}
-                          onChange={(e) => {
-                            const f = e.target.files?.[0] ?? null;
-                            updateDocument(doc.id, "file", f);
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-xs font-normal border-border"
-                          onClick={() => fileInputRefs.current[doc.id]?.click()}
-                          data-ocid="litigation.upload_button"
-                        >
-                          <Paperclip className="w-3 h-3 mr-1" />
-                          {doc.file ? doc.file.name : "Choose file"}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                        Description
-                      </Label>
-                      <Input
-                        value={doc.description}
-                        onChange={(e) =>
-                          updateDocument(doc.id, "description", e.target.value)
-                        }
-                        placeholder="Document description"
-                        className="bg-input border-border text-black font-normal"
-                        data-ocid="litigation.input"
-                      />
-                    </div>
+          <div className="space-y-2 pt-1">
+            {documents.map((doc, idx) => (
+              <div
+                key={doc.id}
+                className="grid grid-cols-2 gap-3 items-end p-2.5 rounded border border-border/60"
+              >
+                <div className="space-y-1">
+                  <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                    Document
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id={`lit-doc-file-${doc.id}`}
+                      className="hidden"
+                      ref={(el) => {
+                        fileInputRefs.current[doc.id] = el;
+                      }}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        updateDocument(doc.id, "file", f);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-normal border-border h-8"
+                      onClick={() => fileInputRefs.current[doc.id]?.click()}
+                      data-ocid="litigation.upload_button"
+                    >
+                      <Paperclip className="w-3 h-3 mr-1" />
+                      {doc.file ? doc.file.name : "Choose file"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                      Description
+                    </Label>
+                    <Input
+                      value={doc.description}
+                      onChange={(e) =>
+                        updateDocument(doc.id, "description", e.target.value)
+                      }
+                      placeholder="Document description"
+                      className="bg-white border-border text-black font-normal h-8 text-sm"
+                      data-ocid="litigation.input"
+                    />
                   </div>
                   {documents.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeDocument(doc.id)}
-                      className="mt-6 p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors mb-0.5"
                       data-ocid={`litigation.delete_button.${idx + 1}`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addDocument}
-                className="text-xs font-normal border-border"
-                data-ocid="litigation.add_button"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Document
-              </Button>
-            </div>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addDocument}
+              className="text-xs font-normal border-border h-8"
+              data-ocid="litigation.add_button"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Add Document
+            </Button>
           </div>
 
           {/* Save */}

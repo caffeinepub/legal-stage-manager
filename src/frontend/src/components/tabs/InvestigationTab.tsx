@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Paperclip, Plus, Search, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
@@ -18,22 +17,12 @@ interface DocumentEntry {
   description: string;
 }
 
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <div className="pt-2">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground font-normal mb-3">
-        {label}
-      </p>
-      <Separator className="mb-4" />
-    </div>
-  );
-}
-
 export default function InvestigationTab({ caseId: _caseId }: Props) {
   const [form, setForm] = useState({
     product: "",
     accountNumber: "",
     loanId: "",
+    legalId: "",
     legalDescription: "",
     omniflowNumber: "",
     investigator: "",
@@ -85,226 +74,219 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
             Customer Investigation
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-5 space-y-6">
-          {/* Loan Information */}
-          <div>
-            <SectionHeader label="Loan Information" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Product
-                </Label>
-                <Input
-                  value={form.product}
-                  onChange={(e) => set("product", e.target.value)}
-                  placeholder="e.g. Personal Loan"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="investigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Account Number
-                </Label>
-                <Input
-                  value={form.accountNumber}
-                  onChange={(e) => set("accountNumber", e.target.value)}
-                  placeholder="e.g. ACC-0001234"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="investigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Loan ID
-                </Label>
-                <Input
-                  value={form.loanId}
-                  onChange={(e) => set("loanId", e.target.value)}
-                  placeholder="e.g. LN-20240001"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="investigation.input"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Omniflow Number
-                </Label>
-                <Input
-                  value={form.omniflowNumber}
-                  onChange={(e) => set("omniflowNumber", e.target.value)}
-                  placeholder="e.g. OMF-00456"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="investigation.input"
-                />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Legal Description
-                </Label>
-                <Textarea
-                  value={form.legalDescription}
-                  onChange={(e) => set("legalDescription", e.target.value)}
-                  placeholder="Describe the legal nature of the case..."
-                  rows={3}
-                  className="bg-input border-border text-black font-normal resize-none"
-                  data-ocid="investigation.textarea"
-                />
-              </div>
+        <CardContent className="pt-4 space-y-3">
+          {/* Row 1: Product | Account Number | Loan ID */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Product
+              </Label>
+              <Input
+                value={form.product}
+                onChange={(e) => set("product", e.target.value)}
+                placeholder="e.g. Personal Loan"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Account Number
+              </Label>
+              <Input
+                value={form.accountNumber}
+                onChange={(e) => set("accountNumber", e.target.value)}
+                placeholder="e.g. ACC-0001234"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Loan ID
+              </Label>
+              <Input
+                value={form.loanId}
+                onChange={(e) => set("loanId", e.target.value)}
+                placeholder="e.g. LN-20240001"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
             </div>
           </div>
 
-          {/* Investigator */}
-          <div>
-            <SectionHeader label="Investigator" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Investigator
-                </Label>
-                <Input
-                  value={form.investigator}
-                  onChange={(e) => set("investigator", e.target.value)}
-                  placeholder="Full name"
-                  className="bg-input border-border text-black font-normal"
-                  data-ocid="investigation.input"
-                />
-              </div>
+          {/* Row 2: Legal ID | Legal Description | Omniflow Number */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Legal ID
+              </Label>
+              <Input
+                value={form.legalId}
+                onChange={(e) => set("legalId", e.target.value)}
+                placeholder="e.g. LEG-00123"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Legal Description
+              </Label>
+              <Input
+                value={form.legalDescription}
+                onChange={(e) => set("legalDescription", e.target.value)}
+                placeholder="Brief legal description"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Omniflow Number
+              </Label>
+              <Input
+                value={form.omniflowNumber}
+                onChange={(e) => set("omniflowNumber", e.target.value)}
+                placeholder="e.g. OMF-00456"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
             </div>
           </div>
 
-          {/* Documents */}
-          <div>
-            <SectionHeader label="Documents" />
-            <div className="space-y-3">
-              {documents.map((doc, idx) => (
-                <div
-                  key={doc.id}
-                  className="flex items-start gap-3 p-3 rounded-md border border-border/60 bg-secondary/30"
+          {/* Row 3: Investigator | Feedback Description | Feedback Upload */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Investigator
+              </Label>
+              <Input
+                value={form.investigator}
+                onChange={(e) => set("investigator", e.target.value)}
+                placeholder="Full name"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
+                data-ocid="investigation.input"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Feedback Description
+              </Label>
+              <Textarea
+                value={form.feedbackDescription}
+                onChange={(e) => set("feedbackDescription", e.target.value)}
+                placeholder="Investigation feedback..."
+                rows={2}
+                className="bg-white border-border text-black font-normal resize-none text-sm"
+                data-ocid="investigation.textarea"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Feedback Upload
+              </Label>
+              <div className="flex items-center pt-1">
+                <input
+                  ref={feedbackFileRef}
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => setFeedbackFile(e.target.files?.[0] ?? null)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-xs font-normal border-border h-8"
+                  onClick={() => feedbackFileRef.current?.click()}
+                  data-ocid="investigation.upload_button"
                 >
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                        Document
-                      </Label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="file"
-                          id={`doc-file-${doc.id}`}
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0] ?? null;
-                            updateDocument(doc.id, "file", f);
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-xs font-normal border-border"
-                          onClick={() =>
-                            document
-                              .getElementById(`doc-file-${doc.id}`)
-                              ?.click()
-                          }
-                          data-ocid="investigation.upload_button"
-                        >
-                          <Paperclip className="w-3 h-3 mr-1" />
-                          {doc.file ? doc.file.name : "Choose file"}
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                        Description
-                      </Label>
-                      <Input
-                        value={doc.description}
-                        onChange={(e) =>
-                          updateDocument(doc.id, "description", e.target.value)
-                        }
-                        placeholder="Document description"
-                        className="bg-input border-border text-black font-normal"
-                        data-ocid="investigation.input"
-                      />
-                    </div>
+                  <Paperclip className="w-3 h-3 mr-1" />
+                  {feedbackFile ? feedbackFile.name : "Attach file"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Document upload rows */}
+          <div className="space-y-2 pt-1">
+            {documents.map((doc, idx) => (
+              <div
+                key={doc.id}
+                className="grid grid-cols-2 gap-3 items-end p-2.5 rounded border border-border/60"
+              >
+                <div className="space-y-1">
+                  <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                    Document
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id={`doc-file-${doc.id}`}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        updateDocument(doc.id, "file", f);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-xs font-normal border-border h-8"
+                      onClick={() =>
+                        document.getElementById(`doc-file-${doc.id}`)?.click()
+                      }
+                      data-ocid="investigation.upload_button"
+                    >
+                      <Paperclip className="w-3 h-3 mr-1" />
+                      {doc.file ? doc.file.name : "Choose file"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 space-y-1">
+                    <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                      Description
+                    </Label>
+                    <Input
+                      value={doc.description}
+                      onChange={(e) =>
+                        updateDocument(doc.id, "description", e.target.value)
+                      }
+                      placeholder="Document description"
+                      className="bg-white border-border text-black font-normal h-8 text-sm"
+                      data-ocid="investigation.input"
+                    />
                   </div>
                   {documents.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeDocument(doc.id)}
-                      className="mt-6 p-1.5 rounded text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors mb-0.5"
                       data-ocid={`investigation.delete_button.${idx + 1}`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addDocument}
-                className="text-xs font-normal border-border"
-                data-ocid="investigation.add_button"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Document
-              </Button>
-            </div>
-          </div>
-
-          {/* Feedback */}
-          <div>
-            <SectionHeader label="Feedback" />
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Feedback Description
-                </Label>
-                <Textarea
-                  value={form.feedbackDescription}
-                  onChange={(e) => set("feedbackDescription", e.target.value)}
-                  placeholder="Describe the investigation feedback..."
-                  rows={3}
-                  className="bg-input border-border text-black font-normal resize-none"
-                  data-ocid="investigation.textarea"
-                />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-normal">
-                  Feedback Document
-                </Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={feedbackFileRef}
-                    type="file"
-                    className="hidden"
-                    onChange={(e) =>
-                      setFeedbackFile(e.target.files?.[0] ?? null)
-                    }
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-xs font-normal border-border"
-                    onClick={() => feedbackFileRef.current?.click()}
-                    data-ocid="investigation.upload_button"
-                  >
-                    <Paperclip className="w-3 h-3 mr-1" />
-                    {feedbackFile
-                      ? feedbackFile.name
-                      : "Attach feedback document"}
-                  </Button>
-                </div>
-              </div>
-            </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addDocument}
+              className="text-xs font-normal border-border h-8"
+              data-ocid="investigation.add_button"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Add Document
+            </Button>
           </div>
 
           {/* Save */}
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-1">
             <Button
               type="submit"
               className="bg-primary text-primary-foreground font-normal"
