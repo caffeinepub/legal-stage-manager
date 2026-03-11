@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Cabinet Grotesk';
+  src: url('/assets/fonts/CabinetGrotesk-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sora';
+  src: url('/assets/fonts/Sora-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* Dark navy legal theme */
+    --background: 0.14 0.025 245;
+    --foreground: 0.94 0.006 240;
+    --card: 0.19 0.022 245;
+    --card-foreground: 0.94 0.006 240;
+    --popover: 0.19 0.022 245;
+    --popover-foreground: 0.94 0.006 240;
+
+    --primary: 0.76 0.13 78;
+    --primary-foreground: 0.14 0.025 245;
+
+    --secondary: 0.24 0.018 245;
+    --secondary-foreground: 0.94 0.006 240;
+
+    --muted: 0.22 0.016 245;
+    --muted-foreground: 0.6 0.014 245;
+
+    --accent: 0.55 0.14 245;
+    --accent-foreground: 0.94 0.006 240;
+
+    --destructive: 0.6 0.22 25;
+    --destructive-foreground: 0.94 0.006 240;
+
+    --border: 0.29 0.018 245;
+    --input: 0.24 0.018 245;
+    --ring: 0.76 0.13 78;
+
+    --chart-1: 0.76 0.13 78;
+    --chart-2: 0.55 0.14 245;
+    --chart-3: 0.65 0.16 162;
+    --chart-4: 0.7 0.15 310;
+    --chart-5: 0.6 0.22 25;
+
+    --sidebar: 0.12 0.028 245;
+    --sidebar-foreground: 0.94 0.006 240;
+    --sidebar-primary: 0.76 0.13 78;
+    --sidebar-primary-foreground: 0.14 0.025 245;
+    --sidebar-accent: 0.22 0.016 245;
+    --sidebar-accent-foreground: 0.94 0.006 240;
+    --sidebar-border: 0.24 0.018 245;
+    --sidebar-ring: 0.76 0.13 78;
+
+    /* Status colors */
+    --status-active: 0.65 0.18 142;
+    --status-expired: 0.6 0.22 25;
+    --status-complied: 0.55 0.14 245;
+    --status-settled: 0.6 0.014 245;
+    --status-litigation: 0.62 0.2 18;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
