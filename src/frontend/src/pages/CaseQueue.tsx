@@ -28,19 +28,7 @@ interface Props {
 }
 
 const SKEL_ROWS = ["r1", "r2", "r3", "r4", "r5"];
-const SKEL_CELLS = [
-  "c1",
-  "c2",
-  "c3",
-  "c4",
-  "c5",
-  "c6",
-  "c7",
-  "c8",
-  "c9",
-  "c10",
-  "c11",
-];
+const SKEL_CELLS = ["c1", "c2", "c3", "c4", "c5", "c6"];
 
 type FilterTab =
   | "all"
@@ -54,25 +42,25 @@ function getStatusBadge(status: string) {
   const s = status.toLowerCase();
   if (s.includes("litigation") || s.includes("trial"))
     return (
-      <Badge className="bg-[oklch(0.6_0.22_18/0.2)] text-[oklch(0.82_0.18_25)] border-[oklch(0.6_0.22_18/0.4)] border">
+      <Badge className="bg-orange-100 text-orange-700 border-orange-300 border">
         {status}
       </Badge>
     );
   if (s === "active")
     return (
-      <Badge className="bg-[oklch(0.65_0.18_142/0.2)] text-[oklch(0.82_0.16_142)] border-[oklch(0.65_0.18_142/0.4)] border">
+      <Badge className="bg-green-100 text-green-700 border-green-300 border">
         {status}
       </Badge>
     );
   if (s === "settled")
     return (
-      <Badge className="bg-[oklch(0.6_0.014_245/0.2)] text-[oklch(0.75_0.014_245)] border-[oklch(0.6_0.014_245/0.4)] border">
+      <Badge className="bg-blue-100 text-blue-700 border-blue-300 border">
         {status}
       </Badge>
     );
   if (s.includes("judgment"))
     return (
-      <Badge className="bg-[oklch(0.55_0.14_245/0.2)] text-[oklch(0.78_0.14_245)] border-[oklch(0.55_0.14_245/0.4)] border">
+      <Badge className="bg-purple-100 text-purple-700 border-purple-300 border">
         {status}
       </Badge>
     );
@@ -123,8 +111,6 @@ export default function CaseQueue({ onSelectCase }: Props) {
   const filtered = useMemo(() => {
     if (!cases) return [];
     let result = cases;
-
-    // Tab filter
     if (activeTab === "active")
       result = result.filter((c) => c.status === "Active");
     else if (activeTab === "notice")
@@ -141,18 +127,12 @@ export default function CaseQueue({ onSelectCase }: Props) {
       );
     else if (activeTab === "closed")
       result = result.filter((c) => c.status === "Settled");
-
-    // Status dropdown
     if (statusFilter !== "all")
       result = result.filter((c) => c.status === statusFilter);
-
-    // Priority dropdown
     if (priorityFilter !== "all")
       result = result.filter(
         (c) => getPriority(c.outstandingBalance) === priorityFilter,
       );
-
-    // Search text
     if (searchText.trim()) {
       const q = searchText.toLowerCase();
       result = result.filter(
@@ -163,7 +143,6 @@ export default function CaseQueue({ onSelectCase }: Props) {
           c.contractId.toLowerCase().includes(q),
       );
     }
-
     return result;
   }, [cases, activeTab, searchText, statusFilter, priorityFilter]);
 
@@ -190,17 +169,13 @@ export default function CaseQueue({ onSelectCase }: Props) {
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? "bg-white text-gray-900 border border-gray-300 shadow-sm font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 }`}
                 data-ocid="queue.tab"
               >
                 {tab.label}
                 <span
-                  className={`text-xs font-mono ${
-                    activeTab === tab.id
-                      ? "text-gray-600"
-                      : "text-muted-foreground"
-                  }`}
+                  className={`text-xs font-mono ${activeTab === tab.id ? "text-gray-600" : "text-muted-foreground"}`}
                 >
                   {tabCounts[tab.id]}
                 </span>
@@ -217,13 +192,13 @@ export default function CaseQueue({ onSelectCase }: Props) {
                 placeholder="Search debtor, account, firm..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="pl-9 bg-card border-border"
+                className="pl-9 bg-white border-border"
                 data-ocid="queue.search_input"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger
-                className="w-[160px] bg-card border-border"
+                className="w-[160px] bg-white border-border"
                 data-ocid="queue.select"
               >
                 <SelectValue placeholder="All Statuses" />
@@ -238,7 +213,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger
-                className="w-[160px] bg-card border-border"
+                className="w-[160px] bg-white border-border"
                 data-ocid="queue.select"
               >
                 <SelectValue placeholder="All Priorities" />
@@ -272,43 +247,28 @@ export default function CaseQueue({ onSelectCase }: Props) {
             </p>
           </div>
 
-          {/* Table */}
-          <div className="rounded-lg border border-border bg-card overflow-hidden shadow-card">
+          {/* Table — 6 columns */}
+          <div className="rounded-lg border border-border bg-white overflow-hidden shadow-sm">
             <Table data-ocid="queue.table">
               <TableHeader>
-                <TableRow className="border-b border-border hover:bg-transparent">
+                <TableRow className="border-b border-border bg-gray-50 hover:bg-gray-50">
                   <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider py-3">
-                    Contract ID
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
                     Case ID
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Description
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Status
                   </TableHead>
                   <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
                     Customer Name
                   </TableHead>
                   <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Cust. No.
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider text-right">
-                    Balance
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Mobile
-                  </TableHead>
-                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Omniflow No.
+                    Status
                   </TableHead>
                   <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
                     Product
                   </TableHead>
+                  <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider text-right">
+                    Outstanding
+                  </TableHead>
                   <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                    Agency
+                    Assigned Agency
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -326,7 +286,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                 {!isLoading && filtered.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={11}
+                      colSpan={6}
                       className="text-center py-16"
                       data-ocid="queue.empty_state"
                     >
@@ -354,40 +314,20 @@ export default function CaseQueue({ onSelectCase }: Props) {
                       onClick={() => onSelectCase(c.caseId)}
                       data-ocid={`queue.row.${idx + 1}`}
                     >
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {c.contractId}
-                      </TableCell>
                       <TableCell className="font-mono text-xs font-semibold text-primary">
                         {c.caseId}
                       </TableCell>
-                      <TableCell className="max-w-[200px]">
-                        <span
-                          className="text-sm truncate block"
-                          title={c.caseDescription}
-                        >
-                          {c.caseDescription}
-                        </span>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(c.status)}</TableCell>
                       <TableCell className="font-medium">
                         {c.customerName}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {c.customerNumber}
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-semibold text-sm">
-                        {formatCurrency(c.outstandingBalance)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {c.mobileNumber}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {c.omniflowNumber}
-                      </TableCell>
+                      <TableCell>{getStatusBadge(c.status)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
                           {c.productType}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-semibold text-sm">
+                        {formatCurrency(c.outstandingBalance)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {c.assignedAgency}
@@ -400,7 +340,6 @@ export default function CaseQueue({ onSelectCase }: Props) {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-border px-6 py-4 text-center">
         <p className="text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()}. Built with ❤️ using{" "}

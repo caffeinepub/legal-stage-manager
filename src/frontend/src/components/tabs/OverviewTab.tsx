@@ -1,14 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  AlertCircle,
-  Calendar,
-  Clock,
-  CreditCard,
-  FileText,
-  User,
-} from "lucide-react";
+import { AlertCircle, Calendar, Clock, FileText, User } from "lucide-react";
 import {
   useGetCase,
   useGetLitigation,
@@ -20,13 +13,27 @@ interface Props {
   caseId: string;
 }
 
-const DATE_OPENED_MAP: Record<string, string> = {
+const DATE_ASSIGNED_MAP: Record<string, string> = {
   "CASE-2024-001": "15 Aug 2024",
   "CASE-2024-002": "22 Jan 2024",
   "CASE-2024-003": "10 Mar 2024",
   "CASE-2024-004": "01 Jun 2024",
   "CASE-2024-005": "05 Sep 2023",
   "CASE-2024-006": "18 Nov 2023",
+  "CASE-2024-007": "20 Sep 2024",
+  "CASE-2024-008": "12 Oct 2024",
+  "CASE-2024-009": "05 Oct 2024",
+  "CASE-2024-010": "12 Jul 2024",
+  "CASE-2025-011": "08 Jan 2025",
+  "CASE-2025-012": "14 Feb 2025",
+  "CASE-2025-013": "20 Feb 2025",
+  "CASE-2025-014": "10 Feb 2025",
+  "CASE-2025-015": "05 Mar 2025",
+  "CASE-2025-016": "18 Jan 2025",
+  "CASE-2025-017": "22 Mar 2025",
+  "CASE-2025-018": "01 Mar 2025",
+  "CASE-2025-019": "15 Mar 2025",
+  "CASE-2025-020": "28 Feb 2025",
 };
 
 const LAST_UPDATED_MAP: Record<string, string> = {
@@ -36,18 +43,237 @@ const LAST_UPDATED_MAP: Record<string, string> = {
   "CASE-2024-004": "15 Jan 2026",
   "CASE-2024-005": "20 Feb 2026",
   "CASE-2024-006": "08 Mar 2026",
+  "CASE-2024-007": "08 Mar 2026",
+  "CASE-2024-008": "06 Mar 2026",
+  "CASE-2024-009": "07 Mar 2026",
+  "CASE-2024-010": "03 Mar 2026",
+  "CASE-2025-011": "09 Mar 2026",
+  "CASE-2025-012": "10 Mar 2026",
+  "CASE-2025-013": "28 Feb 2026",
+  "CASE-2025-014": "09 Mar 2026",
+  "CASE-2025-015": "07 Mar 2026",
+  "CASE-2025-016": "05 Mar 2026",
+  "CASE-2025-017": "06 Mar 2026",
+  "CASE-2025-018": "08 Mar 2026",
+  "CASE-2025-019": "07 Mar 2026",
+  "CASE-2025-020": "04 Mar 2026",
 };
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5 py-2 border-b border-border/50 last:border-0">
-      <span className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold">
-        {label}
-      </span>
-      <span className="text-sm text-foreground">{value || "—"}</span>
-    </div>
-  );
-}
+const LOAN_AMOUNT_MAP: Record<string, number> = {
+  "CASE-2024-001": 55000,
+  "CASE-2024-002": 240000,
+  "CASE-2024-003": 40000,
+  "CASE-2024-004": 100000,
+  "CASE-2024-005": 18000,
+  "CASE-2024-006": 70000,
+  "CASE-2024-007": 180000,
+  "CASE-2024-008": 22000,
+  "CASE-2024-009": 32000,
+  "CASE-2024-010": 80000,
+  "CASE-2025-011": 65000,
+  "CASE-2025-012": 350000,
+  "CASE-2025-013": 45000,
+  "CASE-2025-014": 220000,
+  "CASE-2025-015": 50000,
+  "CASE-2025-016": 140000,
+  "CASE-2025-017": 12000,
+  "CASE-2025-018": 100000,
+  "CASE-2025-019": 28000,
+  "CASE-2025-020": 70000,
+};
+
+const DAYS_PAST_DUE_MAP: Record<string, number> = {
+  "CASE-2024-001": 210,
+  "CASE-2024-002": 85,
+  "CASE-2024-003": 120,
+  "CASE-2024-004": 480,
+  "CASE-2024-005": 0,
+  "CASE-2024-006": 110,
+  "CASE-2024-007": 170,
+  "CASE-2024-008": 60,
+  "CASE-2024-009": 155,
+  "CASE-2024-010": 240,
+  "CASE-2025-011": 95,
+  "CASE-2025-012": 75,
+  "CASE-2025-013": 0,
+  "CASE-2025-014": 130,
+  "CASE-2025-015": 50,
+  "CASE-2025-016": 310,
+  "CASE-2025-017": 45,
+  "CASE-2025-018": 88,
+  "CASE-2025-019": 40,
+  "CASE-2025-020": 260,
+};
+
+type TimelineEntry = {
+  date: string;
+  author: string;
+  color: string;
+  description: string;
+};
+
+const CASE_TIMELINE_MAP: Record<string, TimelineEntry[]> = {
+  "CASE-2024-001": [
+    {
+      date: "05 Mar 2024",
+      author: "Mwangi & Kariuki Advocates",
+      color: "#f97316",
+      description:
+        "Asset discovery initiated — no significant assets confirmed yet",
+    },
+    {
+      date: "15 Feb 2024",
+      author: "Mwangi & Kariuki Advocates",
+      color: "#ef4444",
+      description: "Court summons filed at Nairobi High Court",
+    },
+    {
+      date: "10 Feb 2024",
+      author: "Legal Dept",
+      color: "#eab308",
+      description: "No response received. Final Notice issued.",
+    },
+    {
+      date: "20 Jan 2024",
+      author: "Legal Dept",
+      color: "#eab308",
+      description: "Letter Before Action issued",
+    },
+    {
+      date: "16 Jan 2024",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Mwangi & Kariuki Advocates",
+    },
+  ],
+  "CASE-2024-002": [
+    {
+      date: "01 Mar 2024",
+      author: "Coulson Harney Advocates",
+      color: "#f97316",
+      description: "Formal demand letter served to debtor",
+    },
+    {
+      date: "10 Feb 2024",
+      author: "Legal Dept",
+      color: "#eab308",
+      description: "Mortgage arrears confirmed — 3 months overdue",
+    },
+    {
+      date: "22 Jan 2024",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Coulson Harney Advocates",
+    },
+  ],
+  "CASE-2024-003": [
+    {
+      date: "25 Mar 2024",
+      author: "Hamilton Harrison & Mathews",
+      color: "#f97316",
+      description: "Debtor located — vehicle still in possession",
+    },
+    {
+      date: "15 Mar 2024",
+      author: "Legal Dept",
+      color: "#eab308",
+      description: "Final demand notice issued",
+    },
+    {
+      date: "10 Mar 2024",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Hamilton Harrison & Mathews",
+    },
+  ],
+  "CASE-2024-004": [
+    {
+      date: "15 Jan 2025",
+      author: "Oraro & Company Advocates",
+      color: "#22c55e",
+      description: "Property lien enforcement initiated",
+    },
+    {
+      date: "20 Nov 2024",
+      author: "Nairobi High Court",
+      color: "#ef4444",
+      description: "Judgment issued — property lien granted",
+    },
+    {
+      date: "10 Sep 2024",
+      author: "Oraro & Company Advocates",
+      color: "#f97316",
+      description: "Court summons served",
+    },
+    {
+      date: "01 Jun 2024",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Oraro & Company Advocates",
+    },
+  ],
+  "CASE-2024-007": [
+    {
+      date: "20 Nov 2024",
+      author: "Coulson Harney Advocates",
+      color: "#f97316",
+      description: "Company assets identified for recovery",
+    },
+    {
+      date: "01 Nov 2024",
+      author: "Coulson Harney Advocates",
+      color: "#ef4444",
+      description: "Court summons filed",
+    },
+    {
+      date: "20 Sep 2024",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Coulson Harney Advocates",
+    },
+  ],
+  "CASE-2025-014": [
+    {
+      date: "05 Mar 2025",
+      author: "Hamilton Harrison & Mathews",
+      color: "#f97316",
+      description: "Import document dispute — legal review ongoing",
+    },
+    {
+      date: "20 Feb 2025",
+      author: "Hamilton Harrison & Mathews",
+      color: "#ef4444",
+      description: "Suit filed at Commercial Division, Nairobi",
+    },
+    {
+      date: "10 Feb 2025",
+      author: "Admin",
+      color: "#a855f7",
+      description: "Case assigned to Hamilton Harrison & Mathews",
+    },
+  ],
+};
+
+const DEFAULT_TIMELINE: TimelineEntry[] = [
+  {
+    date: "10 Mar 2026",
+    author: "Legal Dept",
+    color: "#f97316",
+    description: "Case reviewed — escalation pending",
+  },
+  {
+    date: "01 Feb 2026",
+    author: "Legal Dept",
+    color: "#eab308",
+    description: "Demand notice issued to debtor",
+  },
+  {
+    date: "15 Jan 2026",
+    author: "Admin",
+    color: "#a855f7",
+    description: "Case assigned to legal team",
+  },
+];
 
 export default function OverviewTab({ caseId }: Props) {
   const { data: caseData, isLoading: caseLoading } = useGetCase(caseId);
@@ -89,14 +315,17 @@ export default function OverviewTab({ caseId }: Props) {
     .filter((d) => d.date)
     .sort((a, b) => Number(a.date!) - Number(b.date!));
 
-  const dateOpened = DATE_OPENED_MAP[caseId] ?? "01 Jan 2024";
+  const dateAssigned = DATE_ASSIGNED_MAP[caseId] ?? "01 Jan 2024";
   const lastUpdated = LAST_UPDATED_MAP[caseId] ?? "01 Mar 2026";
+  const loanAmount = LOAN_AMOUNT_MAP[caseId] ?? 0;
+  const daysPastDue = DAYS_PAST_DUE_MAP[caseId] ?? 0;
+  const timeline = CASE_TIMELINE_MAP[caseId] ?? DEFAULT_TIMELINE;
 
   if (caseLoading) {
     return (
-      <div className="grid grid-cols-3 gap-5">
-        {["card-a", "card-b", "card-c"].map((key) => (
-          <Card key={key} className="bg-card border-border">
+      <div className="grid grid-cols-2 gap-5">
+        {["card-a", "card-b"].map((key) => (
+          <Card key={key} className="bg-white border-border">
             <CardHeader>
               <Skeleton className="h-5 w-32" />
             </CardHeader>
@@ -124,94 +353,94 @@ export default function OverviewTab({ caseId }: Props) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Contact Information */}
-        <Card className="bg-card border-border shadow-card">
+        <Card className="bg-white border-border shadow-sm">
           <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
+            <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
               <User className="w-4 h-4 text-primary" />
               Contact Information
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-3">
-            <InfoRow label="Customer Name" value={caseData.customerName} />
-            <InfoRow label="Mobile Number" value={caseData.mobileNumber} />
-            <InfoRow
-              label="Customer Number"
-              value={
-                <span className="font-mono text-xs">
-                  {caseData.customerNumber}
-                </span>
-              }
-            />
+            <div className="flex flex-col gap-0.5 py-2 border-b border-border/50">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                Customer Name
+              </span>
+              <span className="text-sm text-black">
+                {caseData.customerName || "—"}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 py-2 border-b border-border/50">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                Mobile Number
+              </span>
+              <span className="text-sm text-black">
+                {caseData.mobileNumber || "—"}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 py-2">
+              <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                Customer Number
+              </span>
+              <span className="text-sm font-mono text-black">
+                {caseData.customerNumber || "—"}
+              </span>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Case Details — restructured */}
-        <Card className="bg-card border-border shadow-card">
+        {/* Case Details */}
+        <Card className="bg-white border-border shadow-sm">
           <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
+            <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
               <FileText className="w-4 h-4 text-primary" />
               Case Details
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-3 px-4">
-            {/* Row 1: Case Type | Case Description */}
             <div className="grid grid-cols-2 gap-4 pb-3">
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Case Type
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Date Assigned
                 </p>
-                <p className="text-sm text-foreground">
-                  {caseData.productType}
-                </p>
+                <p className="text-sm text-black">{dateAssigned}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Case Description
-                </p>
-                <p className="text-sm text-foreground leading-snug">
-                  {caseData.caseDescription}
-                </p>
-              </div>
-            </div>
-
-            <Separator className="my-1 bg-border/60" />
-
-            {/* Row 2: Date Opened | Last Updated */}
-            <div className="grid grid-cols-2 gap-4 pt-3">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Date Opened
-                </p>
-                <p className="text-sm text-foreground">{dateOpened}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                   Last Updated
                 </p>
-                <p className="text-sm text-foreground">{lastUpdated}</p>
+                <p className="text-sm text-black">{lastUpdated}</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Loan Summary */}
-        <Card className="bg-card border-border shadow-card">
-          <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
-              <CreditCard className="w-4 h-4 text-primary" />
-              Loan Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            <div className="py-4 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                Outstanding Balance
-              </p>
-              <p className="text-3xl font-display font-bold text-primary">
-                {formatCurrency(caseData.outstandingBalance)}
-              </p>
+            <Separator className="my-1 bg-border/60" />
+            <div className="grid grid-cols-3 gap-2 pt-3">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Loan Amt
+                </p>
+                <p className="text-sm text-black">
+                  {formatCurrency(loanAmount)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Outstanding
+                </p>
+                <p className="text-sm text-black">
+                  {formatCurrency(caseData.outstandingBalance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                  Days Past Due
+                </p>
+                <p
+                  className={`text-sm ${daysPastDue > 0 ? "text-red-600" : "text-green-600"}`}
+                >
+                  {daysPastDue > 0 ? daysPastDue : "—"}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -220,16 +449,13 @@ export default function OverviewTab({ caseId }: Props) {
       {/* Bottom panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Upcoming Due Dates */}
-        <Card className="bg-card border-border shadow-card">
+        <Card className="bg-white border-border shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold">
-              <Clock
-                className="w-4 h-4"
-                style={{ color: "oklch(0.75 0.18 65)" }}
-              />
+            <CardTitle className="flex items-center gap-2 text-sm font-normal">
+              <Clock className="w-4 h-4" style={{ color: "#f97316" }} />
               <span
-                className="uppercase tracking-widest text-xs font-bold"
-                style={{ color: "oklch(0.75 0.18 65)" }}
+                className="uppercase tracking-widest text-xs"
+                style={{ color: "#f97316" }}
               >
                 Upcoming Due Dates
               </span>
@@ -252,27 +478,24 @@ export default function OverviewTab({ caseId }: Props) {
                       className="flex items-center justify-between py-3"
                       data-ocid={`overview.item.${i + 1}`}
                     >
-                      {/* Left: icon + event name */}
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <Calendar
                           className="w-4 h-4 flex-shrink-0"
-                          style={{ color: "oklch(0.75 0.18 65)" }}
+                          style={{ color: "#f97316" }}
                         />
-                        <span className="text-sm font-semibold text-foreground truncate">
+                        <span className="text-sm text-black truncate">
                           {d.label}
                         </span>
                       </div>
-                      {/* Center: court name */}
                       <span
                         className="text-xs px-3 truncate flex-1 text-center hidden sm:block"
-                        style={{ color: "oklch(0.6 0.08 245)" }}
+                        style={{ color: "#6b7fae" }}
                       >
                         {d.courtName}
                       </span>
-                      {/* Right: date */}
                       <span
-                        className="text-sm font-bold flex-shrink-0"
-                        style={{ color: "oklch(0.75 0.18 65)" }}
+                        className="text-sm flex-shrink-0"
+                        style={{ color: "#f97316" }}
                       >
                         {formatDate(d.date)}
                       </span>
@@ -284,39 +507,40 @@ export default function OverviewTab({ caseId }: Props) {
           </CardContent>
         </Card>
 
-        {/* Case Updates */}
-        <Card className="bg-card border-border shadow-card">
+        {/* Case Timeline */}
+        <Card className="bg-white border-border shadow-sm">
           <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
-              <FileText className="w-4 h-4 text-primary" />
-              Case Updates
+            <CardTitle className="text-xs font-normal text-muted-foreground uppercase tracking-widest">
+              Case Timeline
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-3">
-            <div className="space-y-3">
-              <div className="p-3 rounded-md bg-muted/40 border border-border/50">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Current Status
-                </p>
-                <p className="text-sm font-medium text-foreground">
-                  {caseData.status}
-                </p>
-              </div>
-              <div className="p-3 rounded-md bg-muted/40 border border-border/50">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Case Summary
-                </p>
-                <p className="text-sm text-foreground">
-                  {caseData.caseDescription}
-                </p>
-              </div>
-              <div className="p-3 rounded-md bg-muted/40 border border-border/50">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
-                  Assigned Agency
-                </p>
-                <p className="text-sm text-foreground">
-                  {caseData.assignedAgency || "Not assigned"}
-                </p>
+          <CardContent className="pt-4">
+            <div className="relative pl-5">
+              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border/60" />
+              <div className="space-y-5">
+                {timeline.map((entry) => (
+                  <div
+                    key={`tl-${entry.date}-${entry.author}`}
+                    className="relative flex flex-col gap-0.5"
+                  >
+                    <div
+                      className="absolute -left-5 top-[5px] w-[10px] h-[10px] rounded-full flex-shrink-0 border-2 border-white"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground">
+                        {entry.date}
+                      </span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-xs text-muted-foreground">
+                        {entry.author}
+                      </span>
+                    </div>
+                    <p className="text-sm text-black leading-snug">
+                      {entry.description}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>

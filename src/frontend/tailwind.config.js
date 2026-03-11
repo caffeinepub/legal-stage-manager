@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Cabinet Grotesk", "sans-serif"],
-        body: ["Sora", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
+        body: ["Outfit", "sans-serif"],
         mono: ["Geist Mono", "monospace"],
       },
       colors: {

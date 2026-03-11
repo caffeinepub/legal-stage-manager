@@ -50,7 +50,7 @@ export default function AppLayout({
               <Globe className="w-4 h-4 text-white" />
             </div>
             <span className="font-display font-bold text-[#3B1F00] text-base tracking-tight">
-              KCB Legal
+              NLS TECH
             </span>
           </div>
         </div>
@@ -58,19 +58,19 @@ export default function AppLayout({
         {/* Center: App title */}
         <div className="absolute left-1/2 -translate-x-1/2">
           <span className="font-display font-bold text-gray-800 text-base tracking-tight">
-            KCB Legal — Legal Stage Manager
+            NLS TECH - Kollect Lite Portal
           </span>
         </div>
 
         {/* Right: LSM badge + user + logout */}
         <div className="flex items-center gap-3">
           <span className="bg-gray-900 text-white text-xs font-bold px-2.5 py-1 rounded font-mono">
-            LSM
+            KLP
           </span>
           <div className="flex items-center gap-1.5 text-gray-600">
             <User className="w-4 h-4" />
             <span className="text-sm font-medium hidden md:block">
-              legal@kcbgroup.com
+              admin@nlstech.co.ke
             </span>
           </div>
           <button
@@ -96,7 +96,7 @@ export default function AppLayout({
               {/* Sidebar header */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-[#5a3200]">
                 <span className="text-white font-display font-bold text-xs uppercase tracking-widest">
-                  Legal Stage
+                  Kollect Lite
                 </span>
                 <button
                   type="button"

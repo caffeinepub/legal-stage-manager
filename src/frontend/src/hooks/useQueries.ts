@@ -8,7 +8,7 @@ import {
 } from "../data/sampleData";
 import { useActor } from "./useActor";
 
-const SEED_KEY = "lsm_seeded_v1";
+const SEED_KEY = "klp_seeded_v1";
 
 export function useSeedData() {
   const { actor, isFetching } = useActor();

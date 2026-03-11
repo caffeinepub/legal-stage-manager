@@ -4,12 +4,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import EnforcementTab from "../components/tabs/EnforcementTab";
+import InvestigationTab from "../components/tabs/InvestigationTab";
 import LitigationTab from "../components/tabs/LitigationTab";
 import NoticesTab from "../components/tabs/NoticesTab";
 import OverviewTab from "../components/tabs/OverviewTab";
 import { useGetCase } from "../hooks/useQueries";
 
-type Tab = "overview" | "litigation" | "enforcement" | "notices";
+type Tab =
+  | "overview"
+  | "investigation"
+  | "litigation"
+  | "enforcement"
+  | "notices";
 
 interface Props {
   caseId: string;
@@ -47,6 +53,7 @@ function getStatusBadge(status: string) {
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" },
+  { id: "investigation", label: "Investigation" },
   { id: "litigation", label: "Litigation" },
   { id: "enforcement", label: "Enforcement" },
   { id: "notices", label: "Notices" },
@@ -83,7 +90,7 @@ export default function CaseDetail({ caseId, onBack }: Props) {
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="font-display font-bold text-xl text-foreground">
+                  <h2 className="font-normal text-xl text-foreground">
                     {caseData.customerName}
                   </h2>
                   {getStatusBadge(caseData.status)}
@@ -91,7 +98,7 @@ export default function CaseDetail({ caseId, onBack }: Props) {
                 <div className="flex items-center gap-4 mt-1">
                   <span className="text-sm text-muted-foreground">
                     Case ID:{" "}
-                    <span className="font-mono text-primary font-semibold">
+                    <span className="font-mono text-primary">
                       {caseData.caseId}
                     </span>
                   </span>
@@ -118,7 +125,7 @@ export default function CaseDetail({ caseId, onBack }: Props) {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-md text-sm font-display font-medium transition-all ${
+              className={`px-4 py-2 rounded-md text-sm font-normal transition-all ${
                 activeTab === tab.id
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -135,6 +142,9 @@ export default function CaseDetail({ caseId, onBack }: Props) {
       <main className="flex-1 px-6 py-6">
         <div className="max-w-screen-xl mx-auto animate-fade-in">
           {activeTab === "overview" && <OverviewTab caseId={caseId} />}
+          {activeTab === "investigation" && (
+            <InvestigationTab caseId={caseId} />
+          )}
           {activeTab === "litigation" && <LitigationTab caseId={caseId} />}
           {activeTab === "enforcement" && <EnforcementTab caseId={caseId} />}
           {activeTab === "notices" && <NoticesTab caseId={caseId} />}

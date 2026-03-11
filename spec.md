@@ -1,29 +1,31 @@
-# Legal Stage Manager
+# NLS TECH - Kollect Lite Portal
 
 ## Current State
-New project. No existing code.
+A legal case management portal with case queue and per-case detail screens. Case detail has tabs: Overview, Litigation, Enforcement, Notices. Overview shows Contact Information, Case Details, Loan Summary cards, plus Upcoming Due Dates and Case Timeline. Litigation has fields for court case number, filing date, court name, summons date, hearing date, case status, and judgement.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Case queue landing page (table view) with pre-populated sample data and a manual "Add Case" button
-- Case detail screen with navigation pills: Overview, Litigation, Enforcement, Notices
-- Overview tab: Customer Summary (Contact Info, Case Details, Loan Summary), Upcoming Due Dates, Case Updates
-- Litigation tab: Court Case Number, Filing Date, Court Name/Jurisdiction, Court Summons Date, Hearing Date, Case Status dropdown (Filed, Awaiting Hearing, In Trial, Judgment Issued), Judgement dropdown (Wage Garnishment, Property Lien, Writ of Seizure & Sale, Asset Repossession, Auction)
-- Enforcement tab: Enforcement Type, Initiation Date, Status, Amount Recovered, Responsible Legal Party
-- Notices tab (read-only): Notice ID, Notice Type (1st Demand Notice, Final Demand Notice, Statutory Notice), Notice Sent Date, Notice Expiry Date, Delivery Method (Email/Courier/Physical), Delivery Status, Notice Status (Active/Expired/Complied)
-- Single-user app, no authentication required
+- New "Investigation" tab inserted between Overview and Litigation in the navigation pills
+- InvestigationTab component with the following fields: Product, Account Number, Loan ID, Legal Description, Omniflow Number, Investigator, Document Upload + Description (multi-value: can add multiple document/description pairs), Feedback Description (textarea), Feedback Document Upload
+- New fields in LitigationTab: Suit By, Advocate Instructions (textarea), Advocate, Ground of Suit, Comment (textarea), Witness Name, Witness Email, Follow Up Description (textarea), Document Upload + Description (multi-value)
+- Apply DM Sans (geometric sans-serif) font globally via index.css / tailwind config
+- All label and data text should be rendered in plain black (#000 or near-black) without bold weight
 
 ### Modify
-- N/A
+- CaseDetail tab list: add Investigation tab between Overview and Litigation
+- OverviewTab: remove the Loan Summary card (third card in the summary row), adjusting the grid from 3 to 2 columns
+- LitigationTab: add grouped new fields with logical sections (Case Parties, Legal Grounds, Witness, Follow Up, Documents)
+- All font usage: swap to DM Sans geometric sans-serif
+- Remove bold styling from data display text; labels remain as uppercase tracking-wide but not bold
 
 ### Remove
-- N/A
+- Loan Summary card from OverviewTab
 
 ## Implementation Plan
-1. Define Motoko data types: Case, LitigationRecord, EnforcementRecord, NoticeRecord
-2. Backend functions: getCases, getCase, addCase, updateCase, updateLitigation, updateEnforcement; notices are read-only seeded data
-3. Pre-populate backend with ~5 sample cases including all related sub-records
-4. Frontend: Case Queue page (table with all required columns, Add Case modal/dialog)
-5. Frontend: Case Detail page with tab navigation (Overview, Litigation, Enforcement, Notices)
-6. Each tab renders its respective fields; Litigation and Enforcement are editable; Notices is read-only
+1. Add DM Sans import in index.css and set as default font in tailwind config
+2. Update OverviewTab: remove Loan Summary card, change summary grid to md:grid-cols-2
+3. Create InvestigationTab component (src/frontend/src/components/tabs/InvestigationTab.tsx) with all specified fields including multi-value document upload sections
+4. Update CaseDetail: add Investigation to the TABS array, render InvestigationTab
+5. Update LitigationTab: add new grouped fields (Suit By, Advocate Instructions, Advocate, Ground of Suit, Comment, Witness Name, Witness Email, Follow Up Description, Document Upload+Description multi-value)
+6. Validate build
