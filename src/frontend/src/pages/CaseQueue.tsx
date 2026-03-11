@@ -1,5 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -9,8 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, RefreshCw, Scale } from "lucide-react";
-import { useState } from "react";
+import { Plus, Scale, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import AddCaseDialog from "../components/AddCaseDialog";
 import { useGetCases } from "../hooks/useQueries";
 import { formatCurrency } from "../lib/formatters";
@@ -33,6 +41,14 @@ const SKEL_CELLS = [
   "c10",
   "c11",
 ];
+
+type FilterTab =
+  | "all"
+  | "active"
+  | "notice"
+  | "litigation"
+  | "enforcement"
+  | "closed";
 
 function getStatusBadge(status: string) {
   const s = status.toLowerCase();
@@ -63,43 +79,181 @@ function getStatusBadge(status: string) {
   return <Badge variant="outline">{status}</Badge>;
 }
 
+function getPriority(balance: number): "High" | "Medium" | "Low" {
+  if (balance > 100000) return "High";
+  if (balance >= 50000) return "Medium";
+  return "Low";
+}
+
 export default function CaseQueue({ onSelectCase }: Props) {
-  const { data: cases, isLoading, refetch } = useGetCases();
+  const { data: cases, isLoading } = useGetCases();
   const [addOpen, setAddOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<FilterTab>("all");
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+
+  const tabCounts = useMemo(() => {
+    if (!cases)
+      return {
+        all: 0,
+        active: 0,
+        notice: 0,
+        litigation: 0,
+        enforcement: 0,
+        closed: 0,
+      };
+    return {
+      all: cases.length,
+      active: cases.filter((c) => c.status === "Active").length,
+      notice: cases.filter((c) => c.status.toLowerCase().includes("notice"))
+        .length,
+      litigation: cases.filter((c) =>
+        c.status.toLowerCase().includes("litigation"),
+      ).length,
+      enforcement: cases.filter(
+        (c) =>
+          c.status === "Judgment Issued" ||
+          c.status.toLowerCase().includes("enforcement"),
+      ).length,
+      closed: cases.filter((c) => c.status === "Settled").length,
+    };
+  }, [cases]);
+
+  const filtered = useMemo(() => {
+    if (!cases) return [];
+    let result = cases;
+
+    // Tab filter
+    if (activeTab === "active")
+      result = result.filter((c) => c.status === "Active");
+    else if (activeTab === "notice")
+      result = result.filter((c) => c.status.toLowerCase().includes("notice"));
+    else if (activeTab === "litigation")
+      result = result.filter((c) =>
+        c.status.toLowerCase().includes("litigation"),
+      );
+    else if (activeTab === "enforcement")
+      result = result.filter(
+        (c) =>
+          c.status === "Judgment Issued" ||
+          c.status.toLowerCase().includes("enforcement"),
+      );
+    else if (activeTab === "closed")
+      result = result.filter((c) => c.status === "Settled");
+
+    // Status dropdown
+    if (statusFilter !== "all")
+      result = result.filter((c) => c.status === statusFilter);
+
+    // Priority dropdown
+    if (priorityFilter !== "all")
+      result = result.filter(
+        (c) => getPriority(c.outstandingBalance) === priorityFilter,
+      );
+
+    // Search text
+    if (searchText.trim()) {
+      const q = searchText.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.customerName.toLowerCase().includes(q) ||
+          c.caseId.toLowerCase().includes(q) ||
+          c.caseDescription.toLowerCase().includes(q) ||
+          c.contractId.toLowerCase().includes(q),
+      );
+    }
+
+    return result;
+  }, [cases, activeTab, searchText, statusFilter, priorityFilter]);
+
+  const TABS: { id: FilterTab; label: string }[] = [
+    { id: "all", label: "All" },
+    { id: "active", label: "Active" },
+    { id: "notice", label: "Notice" },
+    { id: "litigation", label: "Litigation" },
+    { id: "enforcement", label: "Enforcement" },
+    { id: "closed", label: "Closed" },
+  ];
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border bg-[oklch(0.12_0.028_245)] px-6 py-4">
-        <div className="flex items-center justify-between max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-primary/10 flex items-center justify-center">
-              <Scale className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-display font-bold text-lg text-foreground tracking-tight">
-                Legal Stage Manager
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Case Queue &amp; Recovery Tracking
-              </p>
-            </div>
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
+      <main className="flex-1 px-6 py-5">
+        <div className="max-w-screen-2xl mx-auto">
+          {/* Filter Tabs */}
+          <div className="flex items-center gap-1 mb-4 flex-wrap">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-white text-gray-900 border border-gray-300 shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+                data-ocid="queue.tab"
+              >
+                {tab.label}
+                <span
+                  className={`text-xs font-mono ${
+                    activeTab === tab.id
+                      ? "text-gray-600"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {tabCounts[tab.id]}
+                </span>
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Search + Filters Row */}
+          <div className="flex items-center gap-3 mb-5 flex-wrap">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search debtor, account, firm..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-9 bg-card border-border"
+                data-ocid="queue.search_input"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger
+                className="w-[160px] bg-card border-border"
+                data-ocid="queue.select"
+              >
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="In Litigation">In Litigation</SelectItem>
+                <SelectItem value="Judgment Issued">Judgment Issued</SelectItem>
+                <SelectItem value="Settled">Settled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger
+                className="w-[160px] bg-card border-border"
+                data-ocid="queue.select"
+              >
+                <SelectValue placeholder="All Priorities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="High">High</SelectItem>
+                <SelectItem value="Medium">Medium</SelectItem>
+                <SelectItem value="Low">Low</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               type="button"
-              variant="ghost"
               size="sm"
-              onClick={() => refetch()}
-              className="text-muted-foreground hover:text-foreground"
-              data-ocid="queue.secondary_button"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-display font-semibold ml-auto"
               onClick={() => setAddOpen(true)}
               data-ocid="queue.primary_button"
             >
@@ -107,38 +261,18 @@ export default function CaseQueue({ onSelectCase }: Props) {
               Add Case
             </Button>
           </div>
-        </div>
-      </header>
 
-      {/* Stats strip */}
-      <div className="border-b border-border bg-card/40 px-6 py-3">
-        <div className="max-w-screen-2xl mx-auto flex items-center gap-6 text-sm">
-          <span className="text-muted-foreground">
-            Total cases:{" "}
-            <span className="text-foreground font-semibold">
-              {cases?.length ?? "—"}
-            </span>
-          </span>
-          <span className="text-muted-foreground">
-            Active:{" "}
-            <span className="text-[oklch(0.82_0.16_142)] font-semibold">
-              {cases?.filter((c) => c.status === "Active").length ?? "—"}
-            </span>
-          </span>
-          <span className="text-muted-foreground">
-            In Litigation:{" "}
-            <span className="text-[oklch(0.82_0.18_25)] font-semibold">
-              {cases?.filter((c) =>
-                c.status.toLowerCase().includes("litigation"),
-              ).length ?? "—"}
-            </span>
-          </span>
-        </div>
-      </div>
+          {/* Section Title */}
+          <div className="mb-4">
+            <h2 className="font-display font-bold text-lg text-foreground">
+              Legal Queue
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {filtered.length} legal {filtered.length === 1 ? "case" : "cases"}
+            </p>
+          </div>
 
-      {/* Table */}
-      <main className="flex-1 px-6 py-6">
-        <div className="max-w-screen-2xl mx-auto">
+          {/* Table */}
           <div className="rounded-lg border border-border bg-card overflow-hidden shadow-card">
             <Table data-ocid="queue.table">
               <TableHeader>
@@ -189,7 +323,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                       ))}
                     </TableRow>
                   ))}
-                {!isLoading && (!cases || cases.length === 0) && (
+                {!isLoading && filtered.length === 0 && (
                   <TableRow>
                     <TableCell
                       colSpan={11}
@@ -213,7 +347,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                   </TableRow>
                 )}
                 {!isLoading &&
-                  cases?.map((c, idx) => (
+                  filtered.map((c, idx) => (
                     <TableRow
                       key={c.caseId}
                       className="cursor-pointer hover:bg-muted/30 transition-colors border-b border-border/50"

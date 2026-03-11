@@ -1,7 +1,7 @@
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-GH", {
+  return new Intl.NumberFormat("en-KE", {
     style: "currency",
-    currency: "GHS",
+    currency: "KES",
     minimumFractionDigits: 2,
   }).format(amount);
 }

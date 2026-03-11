@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, Scale } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import EnforcementTab from "../components/tabs/EnforcementTab";
 import LitigationTab from "../components/tabs/LitigationTab";
@@ -57,34 +57,23 @@ export default function CaseDetail({ caseId, onBack }: Props) {
   const { data: caseData, isLoading } = useGetCase(caseId);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="border-b border-border bg-[oklch(0.12_0.028_245)] px-6 py-4">
-        <div className="max-w-screen-xl mx-auto flex items-center gap-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={onBack}
-            className="text-muted-foreground hover:text-foreground -ml-2"
-            data-ocid="detail.secondary_button"
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Case Queue
-          </Button>
-          <div className="h-4 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <Scale className="w-4 h-4 text-primary" />
-            <span className="font-display font-semibold text-sm text-muted-foreground">
-              Legal Stage Manager
-            </span>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
       {/* Case Header */}
-      <div className="border-b border-border bg-card/40 px-6 py-5">
+      <div className="border-b border-border bg-card/40 px-6 py-4">
         <div className="max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-3 mb-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="text-muted-foreground hover:text-foreground -ml-2"
+              data-ocid="detail.secondary_button"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Case Queue
+            </Button>
+          </div>
           {isLoading ? (
             <div className="space-y-2">
               <Skeleton className="h-6 w-48" />

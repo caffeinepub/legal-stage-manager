@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
+import AppLayout from "./components/AppLayout";
 import { useSeedData } from "./hooks/useQueries";
 import CaseDetail from "./pages/CaseDetail";
 import CaseQueue from "./pages/CaseQueue";
@@ -11,7 +12,7 @@ export default function App() {
   useSeedData();
 
   return (
-    <div className="min-h-screen bg-background font-body">
+    <AppLayout onNavigate={(view) => setPage({ view })} currentView={page.view}>
       {page.view === "queue" && (
         <CaseQueue
           onSelectCase={(id) => setPage({ view: "detail", caseId: id })}
@@ -24,6 +25,6 @@ export default function App() {
         />
       )}
       <Toaster richColors position="top-right" />
-    </div>
+    </AppLayout>
   );
 }

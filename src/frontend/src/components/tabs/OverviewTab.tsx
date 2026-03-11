@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertCircle,
-  CalendarClock,
+  Calendar,
+  Clock,
   CreditCard,
   FileText,
   User,
@@ -17,6 +19,24 @@ import { formatCurrency, formatDate } from "../../lib/formatters";
 interface Props {
   caseId: string;
 }
+
+const DATE_OPENED_MAP: Record<string, string> = {
+  "CASE-2024-001": "15 Aug 2024",
+  "CASE-2024-002": "22 Jan 2024",
+  "CASE-2024-003": "10 Mar 2024",
+  "CASE-2024-004": "01 Jun 2024",
+  "CASE-2024-005": "05 Sep 2023",
+  "CASE-2024-006": "18 Nov 2023",
+};
+
+const LAST_UPDATED_MAP: Record<string, string> = {
+  "CASE-2024-001": "10 Mar 2026",
+  "CASE-2024-002": "05 Mar 2026",
+  "CASE-2024-003": "01 Mar 2026",
+  "CASE-2024-004": "15 Jan 2026",
+  "CASE-2024-005": "20 Feb 2026",
+  "CASE-2024-006": "08 Mar 2026",
+};
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -36,27 +56,41 @@ export default function OverviewTab({ caseId }: Props) {
 
   type DueDate = {
     label: string;
+    courtName: string;
     date: bigint | undefined;
     type: "court" | "hearing" | "notice";
   };
+
   const baseDates: DueDate[] = [
     {
-      label: "Court Summons",
+      label: "Mention Hearing",
+      courtName: litigation?.courtName ?? "",
       date: litigation?.courtSummonsDate,
       type: "court",
     },
-    { label: "Hearing Date", date: litigation?.hearingDate, type: "hearing" },
+    {
+      label: "Substantive Hearing",
+      courtName: litigation?.courtName ?? "",
+      date: litigation?.hearingDate,
+      type: "hearing",
+    },
   ];
+
   const noticeDates: DueDate[] = (notices ?? [])
     .filter((n) => n.noticeStatus === "active")
     .map((n) => ({
       label: `Notice Expiry — ${n.noticeId}`,
+      courtName: "Notice",
       date: n.noticeExpiryDate,
       type: "notice" as const,
     }));
+
   const upcomingDates = [...baseDates, ...noticeDates]
     .filter((d) => d.date)
     .sort((a, b) => Number(a.date!) - Number(b.date!));
+
+  const dateOpened = DATE_OPENED_MAP[caseId] ?? "01 Jan 2024";
+  const lastUpdated = LAST_UPDATED_MAP[caseId] ?? "01 Mar 2026";
 
   if (caseLoading) {
     return (
@@ -113,7 +147,7 @@ export default function OverviewTab({ caseId }: Props) {
           </CardContent>
         </Card>
 
-        {/* Case Details */}
+        {/* Case Details — restructured */}
         <Card className="bg-card border-border shadow-card">
           <CardHeader className="pb-2 border-b border-border/50">
             <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
@@ -121,33 +155,44 @@ export default function OverviewTab({ caseId }: Props) {
               Case Details
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-3">
-            <InfoRow
-              label="Case ID"
-              value={
-                <span className="font-mono text-xs text-primary">
-                  {caseData.caseId}
-                </span>
-              }
-            />
-            <InfoRow
-              label="Contract ID"
-              value={
-                <span className="font-mono text-xs">{caseData.contractId}</span>
-              }
-            />
-            <InfoRow label="Product Type" value={caseData.productType} />
-            <InfoRow label="Assigned Agency" value={caseData.assignedAgency} />
-            <InfoRow
-              label="Omniflow No."
-              value={
-                <span className="font-mono text-xs">
-                  {caseData.omniflowNumber}
-                </span>
-              }
-            />
-            <InfoRow label="Description" value={caseData.caseDescription} />
-            <InfoRow label="Status" value={caseData.status} />
+          <CardContent className="pt-3 px-4">
+            {/* Row 1: Case Type | Case Description */}
+            <div className="grid grid-cols-2 gap-4 pb-3">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
+                  Case Type
+                </p>
+                <p className="text-sm text-foreground">
+                  {caseData.productType}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
+                  Case Description
+                </p>
+                <p className="text-sm text-foreground leading-snug">
+                  {caseData.caseDescription}
+                </p>
+              </div>
+            </div>
+
+            <Separator className="my-1 bg-border/60" />
+
+            {/* Row 2: Date Opened | Last Updated */}
+            <div className="grid grid-cols-2 gap-4 pt-3">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
+                  Date Opened
+                </p>
+                <p className="text-sm text-foreground">{dateOpened}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-display font-semibold mb-1">
+                  Last Updated
+                </p>
+                <p className="text-sm text-foreground">{lastUpdated}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -176,43 +221,62 @@ export default function OverviewTab({ caseId }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Upcoming Due Dates */}
         <Card className="bg-card border-border shadow-card">
-          <CardHeader className="pb-2 border-b border-border/50">
-            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold text-foreground">
-              <CalendarClock className="w-4 h-4 text-primary" />
-              Upcoming Due Dates
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm font-display font-bold">
+              <Clock
+                className="w-4 h-4"
+                style={{ color: "oklch(0.75 0.18 65)" }}
+              />
+              <span
+                className="uppercase tracking-widest text-xs font-bold"
+                style={{ color: "oklch(0.75 0.18 65)" }}
+              >
+                Upcoming Due Dates
+              </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-3">
+          <CardContent className="pt-0">
             {upcomingDates.length === 0 ? (
               <p
-                className="text-sm text-muted-foreground py-4 text-center"
+                className="text-sm text-muted-foreground py-6 text-center"
                 data-ocid="overview.empty_state"
               >
                 No upcoming due dates
               </p>
             ) : (
-              <div className="space-y-1">
+              <div>
                 {upcomingDates.map((d, i) => (
-                  <div
-                    key={`due-${d.label}`}
-                    className="flex items-center justify-between py-2 border-b border-border/40 last:border-0"
-                    data-ocid={`overview.item.${i + 1}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          d.type === "court"
-                            ? "bg-[oklch(0.82_0.18_25)]"
-                            : d.type === "hearing"
-                              ? "bg-[oklch(0.78_0.14_245)]"
-                              : "bg-[oklch(0.82_0.13_78)]"
-                        }`}
-                      />
-                      <span className="text-sm text-foreground">{d.label}</span>
+                  <div key={`due-${d.label}`}>
+                    {i > 0 && <Separator className="bg-border/40" />}
+                    <div
+                      className="flex items-center justify-between py-3"
+                      data-ocid={`overview.item.${i + 1}`}
+                    >
+                      {/* Left: icon + event name */}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Calendar
+                          className="w-4 h-4 flex-shrink-0"
+                          style={{ color: "oklch(0.75 0.18 65)" }}
+                        />
+                        <span className="text-sm font-semibold text-foreground truncate">
+                          {d.label}
+                        </span>
+                      </div>
+                      {/* Center: court name */}
+                      <span
+                        className="text-xs px-3 truncate flex-1 text-center hidden sm:block"
+                        style={{ color: "oklch(0.6 0.08 245)" }}
+                      >
+                        {d.courtName}
+                      </span>
+                      {/* Right: date */}
+                      <span
+                        className="text-sm font-bold flex-shrink-0"
+                        style={{ color: "oklch(0.75 0.18 65)" }}
+                      >
+                        {formatDate(d.date)}
+                      </span>
                     </div>
-                    <span className="text-sm font-mono text-muted-foreground">
-                      {formatDate(d.date)}
-                    </span>
                   </div>
                 ))}
               </div>
