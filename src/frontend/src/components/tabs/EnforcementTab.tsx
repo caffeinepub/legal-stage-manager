@@ -19,6 +19,14 @@ interface Props {
 
 const ENF_SKELETON_KEYS = ["a", "b", "c", "d", "e"];
 
+function FieldCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-1">
+      {children}
+    </div>
+  );
+}
+
 export default function EnforcementTab({ caseId }: Props) {
   const { data: enforcement, isLoading } = useGetEnforcement(caseId);
   const updateEnforcement = useUpdateEnforcement(caseId);
@@ -82,54 +90,54 @@ export default function EnforcementTab({ caseId }: Props) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card className="bg-card border-border shadow-card">
+      <Card className="bg-white border-border shadow-sm">
         <CardHeader className="pb-3 border-b border-border/50">
-          <CardTitle className="flex items-center gap-2 text-sm font-display font-bold">
+          <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
             <Shield className="w-4 h-4 text-primary" />
             Enforcement Record
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide font-display">
+        <CardContent className="pt-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Enforcement Type
               </Label>
               <Input
                 value={form.enforcementType}
                 onChange={(e) => set("enforcementType", e.target.value)}
                 placeholder="e.g. Property Lien, Wage Garnishment"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="enforcement.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide font-display">
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Initiation Date
               </Label>
               <Input
                 type="date"
                 value={form.initiationDate}
                 onChange={(e) => set("initiationDate", e.target.value)}
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="enforcement.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide font-display">
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Status
               </Label>
               <Input
                 value={form.status}
                 onChange={(e) => set("status", e.target.value)}
                 placeholder="e.g. In Progress, Completed"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="enforcement.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide font-display">
-                Amount Recovered (GHS)
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Amount Recovered (KES)
               </Label>
               <Input
                 type="number"
@@ -137,28 +145,28 @@ export default function EnforcementTab({ caseId }: Props) {
                 value={form.amountRecovered}
                 onChange={(e) => set("amountRecovered", e.target.value)}
                 placeholder="0.00"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="enforcement.input"
               />
-            </div>
-            <div className="space-y-1.5 md:col-span-2">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wide font-display">
-                Responsible Legal Party
-              </Label>
-              <Input
-                value={form.responsibleLegalParty}
-                onChange={(e) => set("responsibleLegalParty", e.target.value)}
-                placeholder="Legal firm / attorney name"
-                className="bg-input border-border"
-                data-ocid="enforcement.input"
-              />
-            </div>
+            </FieldCard>
           </div>
-          <div className="mt-6 flex justify-end">
+          <FieldCard>
+            <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+              Responsible Legal Party
+            </Label>
+            <Input
+              value={form.responsibleLegalParty}
+              onChange={(e) => set("responsibleLegalParty", e.target.value)}
+              placeholder="Legal firm / attorney name"
+              className="bg-white border-border text-black font-normal h-8 text-sm"
+              data-ocid="enforcement.input"
+            />
+          </FieldCard>
+          <div className="flex justify-end pt-1">
             <Button
               type="submit"
               disabled={updateEnforcement.isPending}
-              className="bg-primary text-primary-foreground font-display font-semibold"
+              className="bg-primary text-primary-foreground font-normal"
               data-ocid="enforcement.save_button"
             >
               {updateEnforcement.isPending ? (

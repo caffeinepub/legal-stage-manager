@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { Gavel, Loader2, Paperclip, Plus, Save, Trash2 } from "lucide-react";
+import { Gavel, Loader2, Paperclip, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Judgement, LitigationStatus } from "../../backend.d";
@@ -27,6 +27,7 @@ interface DocumentEntry {
   id: string;
   file: File | null;
   description: string;
+  previewUrl: string | null;
 }
 
 const CASE_STATUSES: { value: LitigationStatus; label: string }[] = [
@@ -78,7 +79,7 @@ export default function LitigationTab({ caseId }: Props) {
   });
 
   const [documents, setDocuments] = useState<DocumentEntry[]>([
-    { id: "doc-1", file: null, description: "" },
+    { id: "doc-1", file: null, description: "", previewUrl: null },
   ]);
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -104,7 +105,12 @@ export default function LitigationTab({ caseId }: Props) {
   const addDocument = () => {
     setDocuments((prev) => [
       ...prev,
-      { id: `doc-${Date.now()}`, file: null, description: "" },
+      {
+        id: `doc-${Date.now()}`,
+        file: null,
+        description: "",
+        previewUrl: null,
+      },
     ]);
   };
 
@@ -112,13 +118,18 @@ export default function LitigationTab({ caseId }: Props) {
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   };
 
-  const updateDocument = (
-    id: string,
-    key: "file" | "description",
-    value: File | string | null,
-  ) => {
+  const updateDocumentFile = (id: string, file: File | null) => {
+    const previewUrl = file?.type.startsWith("image/")
+      ? URL.createObjectURL(file)
+      : null;
     setDocuments((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, [key]: value } : d)),
+      prev.map((d) => (d.id === id ? { ...d, file, previewUrl } : d)),
+    );
+  };
+
+  const updateDocumentDescription = (id: string, description: string) => {
+    setDocuments((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, description } : d)),
     );
   };
 
@@ -264,7 +275,7 @@ export default function LitigationTab({ caseId }: Props) {
             </div>
           </div>
 
-          {/* Row 3: Judgement (full width or single col) */}
+          {/* Row 3: Judgement */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1 col-span-2">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
@@ -376,7 +387,7 @@ export default function LitigationTab({ caseId }: Props) {
             </div>
           </div>
 
-          {/* Row 3: Comment | Follow Up Description */}
+          {/* Row 3: Comment | Follow Up Description (each 1 col, reduced size) */}
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
@@ -391,7 +402,7 @@ export default function LitigationTab({ caseId }: Props) {
                 data-ocid="litigation.textarea"
               />
             </div>
-            <div className="space-y-1 col-span-2">
+            <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Follow Up Description
               </Label>
@@ -406,18 +417,46 @@ export default function LitigationTab({ caseId }: Props) {
             </div>
           </div>
 
-          {/* Documents */}
+          {/* Documents — white compact cards */}
           <div className="space-y-2 pt-1">
             {documents.map((doc, idx) => (
               <div
                 key={doc.id}
-                className="grid grid-cols-2 gap-3 items-end p-2.5 rounded border border-border/60"
+                className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-2"
               >
-                <div className="space-y-1">
+                <div className="flex items-center justify-between">
                   <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
-                    Document
+                    Document {documents.length > 1 ? idx + 1 : ""}
                   </Label>
-                  <div className="flex items-center gap-2">
+                  {documents.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeDocument(doc.id)}
+                      className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      data-ocid={`litigation.delete_button.${idx + 1}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                {doc.previewUrl && (
+                  <div className="relative">
+                    <img
+                      src={doc.previewUrl}
+                      alt="Document preview"
+                      className="w-full h-24 object-cover rounded border border-border/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateDocumentFile(doc.id, null)}
+                      className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow text-gray-500 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-2 items-end">
+                  <div>
                     <input
                       type="file"
                       id={`lit-doc-file-${doc.id}`}
@@ -427,47 +466,38 @@ export default function LitigationTab({ caseId }: Props) {
                       }}
                       onChange={(e) => {
                         const f = e.target.files?.[0] ?? null;
-                        updateDocument(doc.id, "file", f);
+                        updateDocumentFile(doc.id, f);
                       }}
                     />
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="text-xs font-normal border-border h-8"
+                      className="w-full text-xs font-normal border-border h-8"
                       onClick={() => fileInputRefs.current[doc.id]?.click()}
                       data-ocid="litigation.upload_button"
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
-                      {doc.file ? doc.file.name : "Choose file"}
+                      {doc.file
+                        ? doc.file.name.slice(0, 14) +
+                          (doc.file.name.length > 14 ? "…" : "")
+                        : "Choose file"}
                     </Button>
                   </div>
-                </div>
-                <div className="flex items-end gap-2">
-                  <div className="flex-1 space-y-1">
+                  <div className="space-y-1">
                     <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                       Description
                     </Label>
                     <Input
                       value={doc.description}
                       onChange={(e) =>
-                        updateDocument(doc.id, "description", e.target.value)
+                        updateDocumentDescription(doc.id, e.target.value)
                       }
                       placeholder="Document description"
                       className="bg-white border-border text-black font-normal h-8 text-sm"
                       data-ocid="litigation.input"
                     />
                   </div>
-                  {documents.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeDocument(doc.id)}
-                      className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors mb-0.5"
-                      data-ocid={`litigation.delete_button.${idx + 1}`}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                 </div>
               </div>
             ))}

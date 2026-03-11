@@ -44,6 +44,15 @@ function getPriority(balance: number): "High" | "Medium" | "Low" {
   return "Low";
 }
 
+const STATUS_PILLS = [
+  "All",
+  "Active",
+  "In Litigation",
+  "Judgment Issued",
+  "Settled",
+] as const;
+type StatusPill = (typeof STATUS_PILLS)[number];
+
 const KPI_CARDS = [
   {
     label: "Calls Due",
@@ -83,13 +92,23 @@ export default function CaseQueue({ onSelectCase }: Props) {
   const { data: cases, isLoading } = useGetCases();
   const [addOpen, setAddOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<StatusPill>("All");
   const [priorityFilter, setPriorityFilter] = useState("all");
+
+  // Compute counts from full cases array (not filtered)
+  const statusCounts = useMemo(() => {
+    if (!cases) return {} as Record<StatusPill, number>;
+    const counts: Record<string, number> = { All: cases.length };
+    for (const c of cases) {
+      counts[c.status] = (counts[c.status] ?? 0) + 1;
+    }
+    return counts as Record<StatusPill, number>;
+  }, [cases]);
 
   const filtered = useMemo(() => {
     if (!cases) return [];
     let result = cases;
-    if (statusFilter !== "all")
+    if (statusFilter !== "All")
       result = result.filter((c) => c.status === statusFilter);
     if (priorityFilter !== "all")
       result = result.filter(
@@ -162,7 +181,33 @@ export default function CaseQueue({ onSelectCase }: Props) {
             </button>
           </div>
 
-          {/* Search + Filters Row */}
+          {/* Status filter pills */}
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            {STATUS_PILLS.map((pill) => {
+              const count =
+                pill === "All"
+                  ? (statusCounts.All ?? 0)
+                  : (statusCounts[pill] ?? 0);
+              const isSelected = statusFilter === pill;
+              return (
+                <button
+                  key={pill}
+                  type="button"
+                  onClick={() => setStatusFilter(pill)}
+                  className={`rounded-full px-3 py-0.5 text-xs border transition-colors ${
+                    isSelected
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  }`}
+                  data-ocid="queue.status_filter.pill"
+                >
+                  {pill} ({count})
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search + Priority Filter Row */}
           <div className="flex items-center gap-3 mb-5 flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -175,21 +220,6 @@ export default function CaseQueue({ onSelectCase }: Props) {
                 data-ocid="queue.search_input"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger
-                className="w-[160px] bg-white border-gray-200"
-                data-ocid="queue.select"
-              >
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="In Litigation">In Litigation</SelectItem>
-                <SelectItem value="Judgment Issued">Judgment Issued</SelectItem>
-                <SelectItem value="Settled">Settled</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger
                 className="w-[160px] bg-white border-gray-200"
@@ -236,8 +266,8 @@ export default function CaseQueue({ onSelectCase }: Props) {
                     <TableHead
                       className="sticky left-0 z-10 bg-gray-50 text-gray-400 text-xs font-normal py-3 border-r border-gray-200"
                       style={{
-                        width: "120px",
-                        minWidth: "120px",
+                        width: "160px",
+                        minWidth: "160px",
                         boxShadow: "2px 0 4px rgba(0,0,0,0.06)",
                       }}
                     >
@@ -327,8 +357,8 @@ export default function CaseQueue({ onSelectCase }: Props) {
                         <TableCell
                           className="sticky left-0 z-10 bg-white border-r border-gray-100"
                           style={{
-                            width: "120px",
-                            minWidth: "120px",
+                            width: "160px",
+                            minWidth: "160px",
                             boxShadow: "2px 0 4px rgba(0,0,0,0.06)",
                           }}
                         >
@@ -336,7 +366,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="text-xs font-normal border-gray-200 text-gray-600 h-7 px-3"
+                            className="text-xs font-normal border-gray-200 text-gray-600 h-8 px-4"
                             onClick={() => onSelectCase(c.caseId)}
                             data-ocid={`queue.secondary_button.${idx + 1}`}
                           >

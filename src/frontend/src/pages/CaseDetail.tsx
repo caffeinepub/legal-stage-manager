@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 import EnforcementTab from "../components/tabs/EnforcementTab";
 import InvestigationTab from "../components/tabs/InvestigationTab";
 import LitigationTab from "../components/tabs/LitigationTab";
@@ -19,7 +19,14 @@ type Tab =
 
 interface Props {
   caseId: string;
-  onBack: () => void;
+  onClose: () => void;
+}
+
+function getDefaultTab(status: string): Tab {
+  const s = status.toLowerCase();
+  if (s.includes("litigation") || s.includes("judgment")) return "litigation";
+  if (s.includes("enforcement")) return "enforcement";
+  return "overview";
 }
 
 function getStatusBadge(status: string) {
@@ -59,50 +66,43 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "notices", label: "Notices" },
 ];
 
-export default function CaseDetail({ caseId, onBack }: Props) {
+export default function CaseDetail({ caseId, onClose }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const { data: caseData, isLoading } = useGetCase(caseId);
 
+  useEffect(() => {
+    if (caseData?.status) {
+      setActiveTab(getDefaultTab(caseData.status));
+    }
+  }, [caseData?.status]);
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Case Header */}
-      <div className="border-b border-border bg-card/40 px-6 py-4">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-3 mb-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              className="text-muted-foreground hover:text-foreground -ml-2"
-              data-ocid="detail.secondary_button"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Case Queue
-            </Button>
-          </div>
-          {isLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          ) : caseData ? (
-            <div className="flex items-start justify-between">
+      <div className="border-b border-gray-200 bg-white px-6 py-4 flex-shrink-0">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            ) : caseData ? (
               <div>
                 <div className="flex items-center gap-3">
-                  <h2 className="font-normal text-xl text-foreground">
+                  <h2 className="font-normal text-lg text-gray-900">
                     {caseData.customerName}
                   </h2>
                   {getStatusBadge(caseData.status)}
                 </div>
                 <div className="flex items-center gap-4 mt-1">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-gray-500">
                     Case ID:{" "}
-                    <span className="font-mono text-primary">
+                    <span className="font-mono text-blue-600">
                       {caseData.caseId}
                     </span>
                   </span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs text-gray-500">
                     Contract:{" "}
                     <span className="font-mono text-xs">
                       {caseData.contractId}
@@ -110,16 +110,27 @@ export default function CaseDetail({ caseId, onBack }: Props) {
                   </span>
                 </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Case not found</p>
-          )}
+            ) : (
+              <p className="text-gray-400 text-sm">Case not found</p>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-700 -mt-1 -mr-2"
+            data-ocid="detail.close_button"
+            aria-label="Close case detail"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
       </div>
 
-      {/* Navigation Pills */}
-      <div className="border-b border-border bg-card/20 px-6">
-        <div className="max-w-screen-xl mx-auto flex items-center gap-1 py-2">
+      {/* Tab Bar */}
+      <div className="border-b border-gray-200 bg-white px-6 flex-shrink-0">
+        <div className="flex items-center gap-1 py-2">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -127,8 +138,8 @@ export default function CaseDetail({ caseId, onBack }: Props) {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-md text-sm font-normal transition-all ${
                 activeTab === tab.id
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  ? "bg-gray-900 text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
               }`}
               data-ocid={`detail.${tab.id}.tab`}
             >
@@ -139,32 +150,13 @@ export default function CaseDetail({ caseId, onBack }: Props) {
       </div>
 
       {/* Tab Content */}
-      <main className="flex-1 px-6 py-6">
-        <div className="max-w-screen-xl mx-auto animate-fade-in">
-          {activeTab === "overview" && <OverviewTab caseId={caseId} />}
-          {activeTab === "investigation" && (
-            <InvestigationTab caseId={caseId} />
-          )}
-          {activeTab === "litigation" && <LitigationTab caseId={caseId} />}
-          {activeTab === "enforcement" && <EnforcementTab caseId={caseId} />}
-          {activeTab === "notices" && <NoticesTab caseId={caseId} />}
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border px-6 py-4 text-center">
-        <p className="text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()}. Built with ❤️ using{" "}
-          <a
-            href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== "undefined" ? window.location.hostname : "")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            caffeine.ai
-          </a>
-        </p>
-      </footer>
+      <div className="flex-1 overflow-y-auto px-6 py-4">
+        {activeTab === "overview" && <OverviewTab caseId={caseId} />}
+        {activeTab === "investigation" && <InvestigationTab caseId={caseId} />}
+        {activeTab === "litigation" && <LitigationTab caseId={caseId} />}
+        {activeTab === "enforcement" && <EnforcementTab caseId={caseId} />}
+        {activeTab === "notices" && <NoticesTab caseId={caseId} />}
+      </div>
     </div>
   );
 }

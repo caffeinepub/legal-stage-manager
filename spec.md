@@ -1,35 +1,33 @@
 # NLS TECH - Kollect Lite Portal
 
 ## Current State
-- Legal Queue has filter tabs (All / Active / Notice / Litigation / Enforcement / Closed) above the table
-- OverviewTab shows fields in stacked card blocks, not compact inline rows
-- InvestigationTab fields laid out in a 2-column grid
-- LitigationTab has faint dashed separators between sub-groups inside Suit Details
+- Case details open as a full page navigation (replaces queue view)
+- Status filter is a dropdown in the search/filter row
+- Priority filter dropdown remains
+- Sidebar has Dashboard, Cases, Reports, Settings sections
+- Sticky Actions column is 120px wide
+- Default tab in CaseDetail is always "overview"
 
 ## Requested Changes (Diff)
 
 ### Add
-- KPI cards row at top of Legal Queue: Calls Due (1201, Target: 60), PTPs Today (1, Target: 40), Broken Promises (0, Target: 20), Recovered (Ksh 0, Target: 10,000) — static decorative values, no dataset connection. Each card: icon + label + value on one line, thin blue progress bar, target label below.
-- Dark brown active-tab indicator bar below KPI cards showing "Legal Queue" with an orange × (matching uploaded reference image style)
+- Floating modal overlay for case details (80vh, centered, background queue visible behind it)
+- Clickable status filter pills with counts immediately above the search bar
+- Default tab logic based on case status (In Litigation → litigation tab, Judgment Issued → litigation, Active → overview, etc.)
 
 ### Modify
-- **CaseQueue.tsx**: Remove the filter pills/tabs row. Replace with KPI cards + Legal Queue active-tab bar described above. Keep search row, table, and all other functionality intact.
-- **OverviewTab.tsx**: Change field layout from stacked card blocks to compact horizontally-inline rows matching the investigation style. Fields should appear as label + value pairs laid out in tight 3-column rows.
-- **InvestigationTab.tsx**: Rearrange fields into specific rows:
-  - Row 1 (3 inline): Product, Account Number, Loan ID
-  - Row 2 (3 inline): Legal ID, Legal Description, Omniflow Number
-  - Row 3 (3 inline): Investigator, Feedback Description, Feedback Upload
-  - Below: Document upload and description section (unchanged multi-value)
-- **LitigationTab.tsx**: 
-  - Display all field groups with 3 fields horizontally inline per row
-  - Remove the faint dashed dividing lines (Separators) inside the Suit Details section
+- App.tsx: selectedCaseId state instead of page navigation; modal open/close handler; queue always rendered
+- CaseQueue.tsx: remove Status dropdown; add clickable status pills row above search bar; widen sticky Actions column to ~160px; open modal instead of navigating
+- CaseDetail.tsx: convert to modal variant with close button (X), no back button, scrollable content inside modal
+- AppLayout.tsx: sidebar nav stripped to only "Legal" section with "Legal Queue" link
 
 ### Remove
-- Filter pills (All / Active / Notice / Litigation / Enforcement / Closed) from CaseQueue
-- Dashed separators between sub-groups in LitigationTab Suit Details section
+- Dashboard, Cases, Reports, Settings sidebar sections
+- Status dropdown from the filter row
+- Full-page navigation pattern for case details
 
 ## Implementation Plan
-1. Update CaseQueue.tsx: remove filter tabs, add KPI cards row + Legal Queue active-tab bar
-2. Update OverviewTab.tsx: compact 3-column inline rows for all field display
-3. Update InvestigationTab.tsx: rearrange into specified 3-column row groups
-4. Update LitigationTab.tsx: 3-inline field layout, remove Suit Details sub-separators
+1. Update App.tsx to hold selectedCaseId; render CaseDetail as overlay modal on top of CaseQueue
+2. Update CaseQueue.tsx: remove Status Select, add status pills row above search, widen Actions column
+3. Update CaseDetail.tsx: accept onClose prop, render as large modal (80vh, fixed centered overlay), default tab derived from case status
+4. Update AppLayout.tsx: sidebar shows only Legal > Legal Queue

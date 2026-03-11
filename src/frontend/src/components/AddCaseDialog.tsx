@@ -47,6 +47,14 @@ function genId(prefix: string) {
   return `${prefix}-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 }
 
+function FieldCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-1.5">
+      {children}
+    </div>
+  );
+}
+
 export default function AddCaseDialog({ open, onOpenChange }: Props) {
   const addCase = useAddCase();
   const [form, setForm] = useState({
@@ -108,7 +116,7 @@ export default function AddCaseDialog({ open, onOpenChange }: Props) {
         data-ocid="case.dialog"
       >
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">
+          <DialogTitle className="font-normal text-lg">
             Add New Case
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm">
@@ -116,56 +124,81 @@ export default function AddCaseDialog({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="contractId">Contract ID</Label>
+          <div className="grid grid-cols-2 gap-3 py-4">
+            <FieldCard>
+              <Label
+                htmlFor="contractId"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Contract ID
+              </Label>
               <Input
                 id="contractId"
                 required
                 value={form.contractId}
                 onChange={(e) => set("contractId", e.target.value)}
                 placeholder="CTR-XXXXX"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="customerName">Customer Name</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="customerName"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Customer Name
+              </Label>
               <Input
                 id="customerName"
                 required
                 value={form.customerName}
                 onChange={(e) => set("customerName", e.target.value)}
                 placeholder="Full legal name"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="customerNumber">Customer Number</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="customerNumber"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Customer Number
+              </Label>
               <Input
                 id="customerNumber"
                 required
                 value={form.customerNumber}
                 onChange={(e) => set("customerNumber", e.target.value)}
                 placeholder="CUST-XXXXX"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="mobileNumber">Mobile Number</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="mobileNumber"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Mobile Number
+              </Label>
               <Input
                 id="mobileNumber"
                 value={form.mobileNumber}
                 onChange={(e) => set("mobileNumber", e.target.value)}
-                placeholder="+233 XX XXX XXXX"
-                className="bg-input border-border"
+                placeholder="+254 7XX XXX XXX"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="outstandingBalance">Outstanding Balance</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="outstandingBalance"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Outstanding Balance
+              </Label>
               <Input
                 id="outstandingBalance"
                 type="number"
@@ -174,29 +207,36 @@ export default function AddCaseDialog({ open, onOpenChange }: Props) {
                 value={form.outstandingBalance}
                 onChange={(e) => set("outstandingBalance", e.target.value)}
                 placeholder="0.00"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="omniflowNumber">Omniflow Number</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="omniflowNumber"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Omniflow Number
+              </Label>
               <Input
                 id="omniflowNumber"
                 value={form.omniflowNumber}
                 onChange={(e) => set("omniflowNumber", e.target.value)}
                 placeholder="OFN-XXXX-XXXX"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Status</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Status
+              </Label>
               <Select
                 value={form.status}
                 onValueChange={(v) => set("status", v)}
               >
                 <SelectTrigger
-                  className="bg-input border-border"
+                  className="bg-white border-border text-black font-normal h-8 text-sm"
                   data-ocid="case.select"
                 >
                   <SelectValue />
@@ -209,15 +249,17 @@ export default function AddCaseDialog({ open, onOpenChange }: Props) {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Product Type</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Product Type
+              </Label>
               <Select
                 value={form.productType}
                 onValueChange={(v) => set("productType", v)}
               >
                 <SelectTrigger
-                  className="bg-input border-border"
+                  className="bg-white border-border text-black font-normal h-8 text-sm"
                   data-ocid="case.select"
                 >
                   <SelectValue />
@@ -230,30 +272,40 @@ export default function AddCaseDialog({ open, onOpenChange }: Props) {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="assignedAgency">Assigned Agency</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="assignedAgency"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Assigned Agency
+              </Label>
               <Input
                 id="assignedAgency"
                 value={form.assignedAgency}
                 onChange={(e) => set("assignedAgency", e.target.value)}
                 placeholder="Legal firm name"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
-            <div className="col-span-2 space-y-1.5">
-              <Label htmlFor="caseDescription">Case Description</Label>
+            </FieldCard>
+            <FieldCard>
+              <Label
+                htmlFor="caseDescription"
+                className="text-[10px] text-gray-400 uppercase tracking-wider font-normal"
+              >
+                Case Description
+              </Label>
               <Input
                 id="caseDescription"
                 required
                 value={form.caseDescription}
                 onChange={(e) => set("caseDescription", e.target.value)}
                 placeholder="Brief description of the case"
-                className="bg-input border-border"
+                className="bg-white border-border text-black font-normal h-8 text-sm"
                 data-ocid="case.input"
               />
-            </div>
+            </FieldCard>
           </div>
           <DialogFooter>
             <Button

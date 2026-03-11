@@ -11,18 +11,11 @@ import { useState } from "react";
 
 interface Props {
   children: React.ReactNode;
-  onNavigate: (view: "queue") => void;
-  currentView: string;
 }
 
-export default function AppLayout({
-  children,
-  onNavigate,
-  currentView,
-}: Props) {
+export default function AppLayout({ children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [dashboardExpanded, setDashboardExpanded] = useState(true);
-  const [casesExpanded, setCasesExpanded] = useState(false);
+  const [legalExpanded, setLegalExpanded] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
 
   const sidebarWidth = sidebarOpen ? 260 : 0;
@@ -123,34 +116,28 @@ export default function AppLayout({
                 </div>
               </div>
 
-              {/* Navigation */}
+              {/* Navigation — Legal only */}
               <nav className="flex-1 overflow-y-auto py-2">
-                {/* Dashboard */}
                 <div>
                   <button
                     type="button"
-                    onClick={() => setDashboardExpanded((v) => !v)}
+                    onClick={() => setLegalExpanded((v) => !v)}
                     className="w-full flex items-center justify-between px-4 py-2.5 text-white hover:bg-[#5a3200] transition-colors group"
                   >
                     <span className="font-display font-bold text-sm">
-                      Dashboard
+                      Legal
                     </span>
-                    {dashboardExpanded ? (
+                    {legalExpanded ? (
                       <ChevronDown className="w-3.5 h-3.5 text-white/60" />
                     ) : (
                       <ChevronRight className="w-3.5 h-3.5 text-white/60" />
                     )}
                   </button>
-                  {dashboardExpanded && (
+                  {legalExpanded && (
                     <div className="ml-4">
                       <button
                         type="button"
-                        onClick={() => onNavigate("queue")}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors rounded-l-none ${
-                          currentView === "queue"
-                            ? "bg-[#5a3200] text-white font-semibold border-l-2 border-[#c19a51]"
-                            : "text-white/70 hover:bg-[#5a3200] hover:text-white"
-                        }`}
+                        className="w-full text-left px-4 py-2 text-sm transition-colors rounded-l-none bg-[#5a3200] text-white font-semibold border-l-2 border-[#c19a51]"
                         data-ocid="sidebar.link"
                       >
                         Legal Queue
@@ -158,54 +145,6 @@ export default function AppLayout({
                     </div>
                   )}
                 </div>
-
-                {/* Cases */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setCasesExpanded((v) => !v)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 text-white hover:bg-[#5a3200] transition-colors"
-                  >
-                    <span className="font-display font-bold text-sm">
-                      Cases
-                    </span>
-                    {casesExpanded ? (
-                      <ChevronDown className="w-3.5 h-3.5 text-white/60" />
-                    ) : (
-                      <ChevronRight className="w-3.5 h-3.5 text-white/60" />
-                    )}
-                  </button>
-                  {casesExpanded && (
-                    <div className="ml-4">
-                      <button
-                        type="button"
-                        onClick={() => onNavigate("queue")}
-                        className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-[#5a3200] hover:text-white transition-colors"
-                        data-ocid="sidebar.link"
-                      >
-                        Case Management
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Reports */}
-                <button
-                  type="button"
-                  className="w-full text-left px-4 py-2.5 text-white/80 hover:bg-[#5a3200] hover:text-white font-display font-bold text-sm transition-colors"
-                  data-ocid="sidebar.link"
-                >
-                  Reports
-                </button>
-
-                {/* Settings */}
-                <button
-                  type="button"
-                  className="w-full text-left px-4 py-2.5 text-white/80 hover:bg-[#5a3200] hover:text-white font-display font-bold text-sm transition-colors"
-                  data-ocid="sidebar.link"
-                >
-                  Settings
-                </button>
               </nav>
             </div>
           )}

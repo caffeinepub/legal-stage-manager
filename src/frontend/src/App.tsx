@@ -5,25 +5,31 @@ import { useSeedData } from "./hooks/useQueries";
 import CaseDetail from "./pages/CaseDetail";
 import CaseQueue from "./pages/CaseQueue";
 
-export type AppPage = { view: "queue" } | { view: "detail"; caseId: string };
-
 export default function App() {
-  const [page, setPage] = useState<AppPage>({ view: "queue" });
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   useSeedData();
 
   return (
-    <AppLayout onNavigate={(view) => setPage({ view })} currentView={page.view}>
-      {page.view === "queue" && (
-        <CaseQueue
-          onSelectCase={(id) => setPage({ view: "detail", caseId: id })}
-        />
+    <AppLayout>
+      <CaseQueue onSelectCase={(id) => setSelectedCaseId(id)} />
+
+      {selectedCaseId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+        >
+          <div
+            className="bg-white rounded-lg shadow-2xl overflow-hidden"
+            style={{ width: "90vw", height: "80vh" }}
+          >
+            <CaseDetail
+              caseId={selectedCaseId}
+              onClose={() => setSelectedCaseId(null)}
+            />
+          </div>
+        </div>
       )}
-      {page.view === "detail" && (
-        <CaseDetail
-          caseId={page.caseId}
-          onBack={() => setPage({ view: "queue" })}
-        />
-      )}
+
       <Toaster richColors position="top-right" />
     </AppLayout>
   );

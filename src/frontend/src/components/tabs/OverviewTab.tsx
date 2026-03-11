@@ -381,10 +381,7 @@ export default function OverviewTab({ caseId }: Props) {
           fields={[
             { label: "Date Assigned", value: dateAssigned },
             { label: "Last Updated", value: lastUpdated },
-            {
-              label: "Days Past Due",
-              value: daysPastDue > 0 ? String(daysPastDue) : "—",
-            },
+            { label: "Product", value: caseData.productType ?? "—" },
           ]}
         />
         <FieldRow
@@ -394,7 +391,10 @@ export default function OverviewTab({ caseId }: Props) {
               label: "Outstanding",
               value: formatCurrency(caseData.outstandingBalance),
             },
-            { label: "Product", value: caseData.productType ?? "—" },
+            {
+              label: "Days Past Due",
+              value: daysPastDue > 0 ? String(daysPastDue) : "—",
+            },
           ]}
         />
       </div>
@@ -405,11 +405,8 @@ export default function OverviewTab({ caseId }: Props) {
         <Card className="bg-white border-border shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm font-normal">
-              <Clock className="w-4 h-4" style={{ color: "#f97316" }} />
-              <span
-                className="uppercase tracking-widest text-xs"
-                style={{ color: "#f97316" }}
-              >
+              <Clock className="w-4 h-4 text-blue-600" />
+              <span className="uppercase tracking-widest text-xs text-blue-600">
                 Upcoming Due Dates
               </span>
             </CardTitle>
@@ -432,10 +429,7 @@ export default function OverviewTab({ caseId }: Props) {
                       data-ocid={`overview.item.${i + 1}`}
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Calendar
-                          className="w-4 h-4 flex-shrink-0"
-                          style={{ color: "#f97316" }}
-                        />
+                        <Calendar className="w-4 h-4 flex-shrink-0 text-blue-600" />
                         <span className="text-sm text-black truncate">
                           {d.label}
                         </span>
@@ -446,10 +440,7 @@ export default function OverviewTab({ caseId }: Props) {
                       >
                         {d.courtName}
                       </span>
-                      <span
-                        className="text-sm flex-shrink-0"
-                        style={{ color: "#f97316" }}
-                      >
+                      <span className="text-sm flex-shrink-0 text-blue-600">
                         {formatDate(d.date)}
                       </span>
                     </div>
