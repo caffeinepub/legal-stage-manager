@@ -12,12 +12,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Gavel, Loader2, Paperclip, Plus, Save, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Judgement, LitigationStatus } from "../../backend.d";
 import type { LitigationRecord } from "../../backend.d";
 import { useGetLitigation, useUpdateLitigation } from "../../hooks/useQueries";
-import { formatDateInput, parseDate } from "../../lib/formatters";
+import { parseDate } from "../../lib/formatters";
 
 interface Props {
   caseId: string;
@@ -48,16 +48,19 @@ const JUDGEMENTS: { value: Judgement; label: string }[] = [
 
 const LIT_SKELETON_KEYS = ["a", "b", "c", "d", "e", "f"];
 
+const dateInputClass =
+  "bg-white border-border text-black font-normal h-7 text-xs [&::-webkit-datetime-edit]:font-normal [&::-webkit-datetime-edit-fields-wrapper]:font-normal [&::-webkit-datetime-edit-year-field]:font-normal [&::-webkit-datetime-edit-month-field]:font-normal [&::-webkit-datetime-edit-day-field]:font-normal";
+
 function SectionLabel({ label }: { label: string }) {
   return (
-    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-normal mb-3 mt-4 first:mt-0">
+    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-normal mb-2 mt-3 first:mt-0">
       {label}
     </p>
   );
 }
 
 export default function LitigationTab({ caseId }: Props) {
-  const { data: litigation, isLoading } = useGetLitigation(caseId);
+  const { isLoading } = useGetLitigation(caseId);
   const updateLitigation = useUpdateLitigation(caseId);
 
   const [form, setForm] = useState({
@@ -83,21 +86,6 @@ export default function LitigationTab({ caseId }: Props) {
   ]);
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-
-  useEffect(() => {
-    if (litigation) {
-      setForm((prev) => ({
-        ...prev,
-        courtCaseNumber: litigation.courtCaseNumber ?? "",
-        filingDate: formatDateInput(litigation.filingDate),
-        courtName: litigation.courtName ?? "",
-        courtSummonsDate: formatDateInput(litigation.courtSummonsDate),
-        hearingDate: formatDateInput(litigation.hearingDate),
-        caseStatus: litigation.caseStatus ?? LitigationStatus.filed,
-        judgement: litigation.judgement ?? Judgement.none,
-      }));
-    }
-  }, [litigation]);
 
   const set = (key: string, val: string) =>
     setForm((p) => ({ ...p, [key]: val }));
@@ -157,12 +145,12 @@ export default function LitigationTab({ caseId }: Props) {
   if (isLoading) {
     return (
       <Card className="bg-card border-border">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-3 gap-4">
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-3 gap-3">
             {LIT_SKELETON_KEYS.map((k) => (
-              <div key={k} className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-9 w-full" />
+              <div key={k} className="space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-8 w-full" />
               </div>
             ))}
           </div>
@@ -174,18 +162,16 @@ export default function LitigationTab({ caseId }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <Card className="bg-white border-border shadow-sm">
-        <CardHeader className="pb-3 border-b border-border/50">
+        <CardHeader className="pb-2 pt-3 px-4 border-b border-border/50">
           <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
             <Gavel className="w-4 h-4 text-primary" />
             Litigation Record
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-4 space-y-3">
-          {/* Court Information */}
+        <CardContent className="pt-3 px-4 pb-4 space-y-2">
           <SectionLabel label="Court Information" />
 
-          {/* Row 1: Court Case Number | Filing Date | Court Name */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Court Case Number
@@ -194,7 +180,7 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.courtCaseNumber}
                 onChange={(e) => set("courtCaseNumber", e.target.value)}
                 placeholder="GH/HCC/YYYY/XXXX"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
@@ -206,7 +192,7 @@ export default function LitigationTab({ caseId }: Props) {
                 type="date"
                 value={form.filingDate}
                 onChange={(e) => set("filingDate", e.target.value)}
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className={dateInputClass}
                 data-ocid="litigation.input"
               />
             </div>
@@ -218,14 +204,13 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.courtName}
                 onChange={(e) => set("courtName", e.target.value)}
                 placeholder="High Court — Commercial Division"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
           </div>
 
-          {/* Row 2: Court Summons Date | Hearing Date | Case Status */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Court Summons Date
@@ -234,7 +219,7 @@ export default function LitigationTab({ caseId }: Props) {
                 type="date"
                 value={form.courtSummonsDate}
                 onChange={(e) => set("courtSummonsDate", e.target.value)}
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className={dateInputClass}
                 data-ocid="litigation.input"
               />
             </div>
@@ -246,7 +231,7 @@ export default function LitigationTab({ caseId }: Props) {
                 type="date"
                 value={form.hearingDate}
                 onChange={(e) => set("hearingDate", e.target.value)}
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className={dateInputClass}
                 data-ocid="litigation.input"
               />
             </div>
@@ -259,7 +244,7 @@ export default function LitigationTab({ caseId }: Props) {
                 onValueChange={(v) => set("caseStatus", v)}
               >
                 <SelectTrigger
-                  className="bg-white border-border text-black font-normal h-8 text-sm"
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
                   data-ocid="litigation.select"
                 >
                   <SelectValue />
@@ -275,8 +260,7 @@ export default function LitigationTab({ caseId }: Props) {
             </div>
           </div>
 
-          {/* Row 3: Judgement */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1 col-span-2">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Judgement
@@ -286,7 +270,7 @@ export default function LitigationTab({ caseId }: Props) {
                 onValueChange={(v) => set("judgement", v)}
               >
                 <SelectTrigger
-                  className="bg-white border-border text-black font-normal h-8 text-sm"
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
                   data-ocid="litigation.select"
                 >
                   <SelectValue />
@@ -302,11 +286,9 @@ export default function LitigationTab({ caseId }: Props) {
             </div>
           </div>
 
-          {/* Suit Details */}
           <SectionLabel label="Suit Details" />
 
-          {/* Row 1: Suit By | Ground of Suit | Advocate */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Suit By
@@ -315,7 +297,7 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.suitBy}
                 onChange={(e) => set("suitBy", e.target.value)}
                 placeholder="e.g. NLS TECH Ltd"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
@@ -327,7 +309,7 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.groundOfSuit}
                 onChange={(e) => set("groundOfSuit", e.target.value)}
                 placeholder="e.g. Non-payment of loan"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
@@ -339,14 +321,13 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.advocate}
                 onChange={(e) => set("advocate", e.target.value)}
                 placeholder="Advocate name"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
           </div>
 
-          {/* Row 2: Advocate Instructions | Witness Name | Witness Email */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Advocate Instructions
@@ -354,9 +335,9 @@ export default function LitigationTab({ caseId }: Props) {
               <Textarea
                 value={form.advocateInstructions}
                 onChange={(e) => set("advocateInstructions", e.target.value)}
-                placeholder="Instructions to the advocate..."
+                placeholder="Instructions..."
                 rows={2}
-                className="bg-white border-border text-black font-normal resize-none text-sm"
+                className="bg-white border-border text-black font-normal resize-none text-xs"
                 data-ocid="litigation.textarea"
               />
             </div>
@@ -368,7 +349,7 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.witnessName}
                 onChange={(e) => set("witnessName", e.target.value)}
                 placeholder="Full name"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
@@ -381,14 +362,13 @@ export default function LitigationTab({ caseId }: Props) {
                 value={form.witnessEmail}
                 onChange={(e) => set("witnessEmail", e.target.value)}
                 placeholder="witness@example.com"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="litigation.input"
               />
             </div>
           </div>
 
-          {/* Row 3: Comment | Follow Up Description (each 1 col, reduced size) */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Comment
@@ -398,7 +378,7 @@ export default function LitigationTab({ caseId }: Props) {
                 onChange={(e) => set("comment", e.target.value)}
                 placeholder="Additional comments..."
                 rows={2}
-                className="bg-white border-border text-black font-normal resize-none text-sm"
+                className="bg-white border-border text-black font-normal resize-none text-xs"
                 data-ocid="litigation.textarea"
               />
             </div>
@@ -409,22 +389,22 @@ export default function LitigationTab({ caseId }: Props) {
               <Textarea
                 value={form.followUpDescription}
                 onChange={(e) => set("followUpDescription", e.target.value)}
-                placeholder="Describe the follow-up actions required..."
+                placeholder="Follow-up actions..."
                 rows={2}
-                className="bg-white border-border text-black font-normal resize-none text-sm"
+                className="bg-white border-border text-black font-normal resize-none text-xs"
                 data-ocid="litigation.textarea"
               />
             </div>
           </div>
 
-          {/* Documents — white compact cards */}
-          <div className="space-y-2 pt-1">
+          {/* Documents */}
+          <div className="space-y-1 pt-1">
             {documents.map((doc, idx) => (
               <div
                 key={doc.id}
-                className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-2"
+                className="bg-white border border-gray-100 rounded-md p-1.5 shadow-sm"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-1">
                   <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                     Document {documents.length > 1 ? idx + 1 : ""}
                   </Label>
@@ -432,19 +412,19 @@ export default function LitigationTab({ caseId }: Props) {
                     <button
                       type="button"
                       onClick={() => removeDocument(doc.id)}
-                      className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500"
                       data-ocid={`litigation.delete_button.${idx + 1}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
                 {doc.previewUrl && (
-                  <div className="relative">
+                  <div className="relative mb-1">
                     <img
                       src={doc.previewUrl}
-                      alt="Document preview"
-                      className="w-full h-24 object-cover rounded border border-border/50"
+                      alt="Preview"
+                      className="w-full h-16 object-cover rounded border border-border/50"
                     />
                     <button
                       type="button"
@@ -455,8 +435,8 @@ export default function LitigationTab({ caseId }: Props) {
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-2 items-end">
-                  <div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-shrink-0">
                     <input
                       type="file"
                       id={`lit-doc-file-${doc.id}`}
@@ -473,28 +453,25 @@ export default function LitigationTab({ caseId }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="w-full text-xs font-normal border-border h-8"
+                      className="text-xs font-normal border-border h-6 px-2"
                       onClick={() => fileInputRefs.current[doc.id]?.click()}
                       data-ocid="litigation.upload_button"
                     >
                       <Paperclip className="w-3 h-3 mr-1" />
                       {doc.file
-                        ? doc.file.name.slice(0, 14) +
-                          (doc.file.name.length > 14 ? "…" : "")
+                        ? doc.file.name.slice(0, 12) +
+                          (doc.file.name.length > 12 ? "…" : "")
                         : "Choose file"}
                     </Button>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
-                      Description
-                    </Label>
+                  <div className="flex-1">
                     <Input
                       value={doc.description}
                       onChange={(e) =>
                         updateDocumentDescription(doc.id, e.target.value)
                       }
-                      placeholder="Document description"
-                      className="bg-white border-border text-black font-normal h-8 text-sm"
+                      placeholder="Description"
+                      className="bg-white border-border text-black font-normal h-6 text-xs"
                       data-ocid="litigation.input"
                     />
                   </div>
@@ -506,7 +483,7 @@ export default function LitigationTab({ caseId }: Props) {
               variant="outline"
               size="sm"
               onClick={addDocument}
-              className="text-xs font-normal border-border h-8"
+              className="text-xs font-normal border-border h-7"
               data-ocid="litigation.add_button"
             >
               <Plus className="w-3 h-3 mr-1" />
@@ -514,12 +491,11 @@ export default function LitigationTab({ caseId }: Props) {
             </Button>
           </div>
 
-          {/* Save */}
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-1">
             <Button
               type="submit"
               disabled={updateLitigation.isPending}
-              className="bg-primary text-primary-foreground font-normal"
+              className="bg-primary text-primary-foreground font-normal h-8 text-sm"
               data-ocid="litigation.save_button"
             >
               {updateLitigation.isPending ? (

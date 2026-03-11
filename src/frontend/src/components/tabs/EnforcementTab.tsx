@@ -21,7 +21,7 @@ const ENF_SKELETON_KEYS = ["a", "b", "c", "d", "e"];
 
 function FieldCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-1">
+    <div className="bg-white border border-gray-100 rounded-md p-2.5 shadow-sm space-y-1">
       {children}
     </div>
   );
@@ -74,12 +74,12 @@ export default function EnforcementTab({ caseId }: Props) {
   if (isLoading) {
     return (
       <Card className="bg-card border-border">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-2 gap-3">
             {ENF_SKELETON_KEYS.map((k) => (
-              <div key={k} className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-9 w-full" />
+              <div key={k} className="space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-8 w-full" />
               </div>
             ))}
           </div>
@@ -91,14 +91,14 @@ export default function EnforcementTab({ caseId }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <Card className="bg-white border-border shadow-sm">
-        <CardHeader className="pb-3 border-b border-border/50">
+        <CardHeader className="pb-2 pt-3 px-4 border-b border-border/50">
           <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
             <Shield className="w-4 h-4 text-primary" />
             Enforcement Record
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <CardContent className="pt-3 px-4 pb-4 space-y-2">
+          <div className="grid grid-cols-2 gap-2.5">
             <FieldCard>
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Enforcement Type
@@ -107,7 +107,7 @@ export default function EnforcementTab({ caseId }: Props) {
                 value={form.enforcementType}
                 onChange={(e) => set("enforcementType", e.target.value)}
                 placeholder="e.g. Property Lien, Wage Garnishment"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="enforcement.input"
               />
             </FieldCard>
@@ -119,7 +119,7 @@ export default function EnforcementTab({ caseId }: Props) {
                 type="date"
                 value={form.initiationDate}
                 onChange={(e) => set("initiationDate", e.target.value)}
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="enforcement.input"
               />
             </FieldCard>
@@ -131,7 +131,7 @@ export default function EnforcementTab({ caseId }: Props) {
                 value={form.status}
                 onChange={(e) => set("status", e.target.value)}
                 placeholder="e.g. In Progress, Completed"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="enforcement.input"
               />
             </FieldCard>
@@ -145,7 +145,7 @@ export default function EnforcementTab({ caseId }: Props) {
                 value={form.amountRecovered}
                 onChange={(e) => set("amountRecovered", e.target.value)}
                 placeholder="0.00"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="enforcement.input"
               />
             </FieldCard>
@@ -158,7 +158,7 @@ export default function EnforcementTab({ caseId }: Props) {
               value={form.responsibleLegalParty}
               onChange={(e) => set("responsibleLegalParty", e.target.value)}
               placeholder="Legal firm / attorney name"
-              className="bg-white border-border text-black font-normal h-8 text-sm"
+              className="bg-white border-border text-black font-normal h-7 text-xs"
               data-ocid="enforcement.input"
             />
           </FieldCard>
@@ -166,7 +166,7 @@ export default function EnforcementTab({ caseId }: Props) {
             <Button
               type="submit"
               disabled={updateEnforcement.isPending}
-              className="bg-primary text-primary-foreground font-normal"
+              className="bg-primary text-primary-foreground font-normal h-8 text-sm"
               data-ocid="enforcement.save_button"
             >
               {updateEnforcement.isPending ? (

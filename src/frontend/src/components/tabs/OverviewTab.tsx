@@ -279,13 +279,13 @@ function FieldRow({
   fields,
 }: { fields: { label: string; value: string; mono?: boolean }[] }) {
   return (
-    <div className="grid grid-cols-3 gap-x-6 gap-y-0 py-2.5 border-b border-gray-100 last:border-b-0">
+    <div className="grid grid-cols-3 gap-x-4 gap-y-0 py-2 border-b border-gray-100 last:border-b-0">
       {fields.map((f) => (
         <div key={f.label}>
           <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-0.5">
             {f.label}
           </p>
-          <p className={`text-sm text-black ${f.mono ? "font-mono" : ""}`}>
+          <p className={`text-xs text-black ${f.mono ? "font-mono" : ""}`}>
             {f.value || "—"}
           </p>
         </div>
@@ -342,9 +342,9 @@ export default function OverviewTab({ caseId }: Props) {
 
   if (caseLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         {["a", "b"].map((k) => (
-          <Skeleton key={k} className="h-24 w-full rounded-md" />
+          <Skeleton key={k} className="h-20 w-full rounded-md" />
         ))}
       </div>
     );
@@ -363,9 +363,9 @@ export default function OverviewTab({ caseId }: Props) {
   }
 
   return (
-    <div className="space-y-5">
-      {/* Compact summary — inline field rows */}
-      <div className="bg-white border border-gray-200 rounded-md px-4 py-2">
+    <div className="space-y-3">
+      {/* Compact summary */}
+      <div className="bg-white border border-gray-200 rounded-md px-3 py-1">
         <FieldRow
           fields={[
             { label: "Customer Name", value: caseData.customerName },
@@ -400,21 +400,21 @@ export default function OverviewTab({ caseId }: Props) {
       </div>
 
       {/* Bottom panels */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Upcoming Due Dates */}
         <Card className="bg-white border-border shadow-sm">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-1 pt-3 px-4">
             <CardTitle className="flex items-center gap-2 text-sm font-normal">
-              <Clock className="w-4 h-4 text-blue-600" />
+              <Clock className="w-3.5 h-3.5 text-blue-600" />
               <span className="uppercase tracking-widest text-xs text-blue-600">
                 Upcoming Due Dates
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 px-4 pb-3">
             {upcomingDates.length === 0 ? (
               <p
-                className="text-sm text-muted-foreground py-6 text-center"
+                className="text-xs text-muted-foreground py-4 text-center"
                 data-ocid="overview.empty_state"
               >
                 No upcoming due dates
@@ -425,22 +425,22 @@ export default function OverviewTab({ caseId }: Props) {
                   <div key={`due-${d.label}`}>
                     {i > 0 && <Separator className="bg-border/40" />}
                     <div
-                      className="flex items-center justify-between py-3"
+                      className="flex items-center justify-between py-2"
                       data-ocid={`overview.item.${i + 1}`}
                     >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Calendar className="w-4 h-4 flex-shrink-0 text-blue-600" />
-                        <span className="text-sm text-black truncate">
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-blue-600" />
+                        <span className="text-xs text-black truncate">
                           {d.label}
                         </span>
                       </div>
                       <span
-                        className="text-xs px-3 truncate flex-1 text-center hidden sm:block"
+                        className="text-xs px-2 truncate flex-1 text-center hidden sm:block"
                         style={{ color: "#6b7fae" }}
                       >
                         {d.courtName}
                       </span>
-                      <span className="text-sm flex-shrink-0 text-blue-600">
+                      <span className="text-xs flex-shrink-0 text-blue-600">
                         {formatDate(d.date)}
                       </span>
                     </div>
@@ -453,34 +453,36 @@ export default function OverviewTab({ caseId }: Props) {
 
         {/* Case Timeline */}
         <Card className="bg-white border-border shadow-sm">
-          <CardHeader className="pb-2 border-b border-border/50">
+          <CardHeader className="pb-1 pt-3 px-4 border-b border-border/50">
             <CardTitle className="text-xs font-normal text-muted-foreground uppercase tracking-widest">
               Case Timeline
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-3 px-4 pb-3">
             <div className="relative pl-5">
               <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border/60" />
-              <div className="space-y-5">
+              <div className="space-y-3">
                 {timeline.map((entry) => (
                   <div
                     key={`tl-${entry.date}-${entry.author}`}
                     className="relative flex flex-col gap-0.5"
                   >
                     <div
-                      className="absolute -left-5 top-[5px] w-[10px] h-[10px] rounded-full flex-shrink-0 border-2 border-white"
+                      className="absolute -left-5 top-[4px] w-2.5 h-2.5 rounded-full flex-shrink-0 border-2 border-white"
                       style={{ backgroundColor: entry.color }}
                     />
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground">
                         {entry.date}
                       </span>
-                      <span className="text-xs text-muted-foreground">·</span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
+                        ·
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
                         {entry.author}
                       </span>
                     </div>
-                    <p className="text-sm text-black leading-snug">
+                    <p className="text-xs text-black leading-snug">
                       {entry.description}
                     </p>
                   </div>

@@ -1,172 +1,226 @@
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Bell } from "lucide-react";
-import { DeliveryMethod, NoticeStatus, NoticeType } from "../../backend.d";
-import { useGetNotices } from "../../hooks/useQueries";
-import { formatDate } from "../../lib/formatters";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Bell, Loader2, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   caseId: string;
 }
 
-const NOTICE_SKEL_ROWS = ["row-a", "row-b", "row-c"];
-const NOTICE_SKEL_CELLS = ["c1", "c2", "c3", "c4", "c5", "c6", "c7"];
-
-function noticeTypeLabel(t: NoticeType): string {
-  switch (t) {
-    case NoticeType.firstDemand:
-      return "1st Demand Notice";
-    case NoticeType.finalDemand:
-      return "Final Demand Notice";
-    case NoticeType.statutory:
-      return "Statutory Notice";
-    default:
-      return t;
-  }
+function FieldCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-md p-2.5 shadow-sm space-y-1">
+      {children}
+    </div>
+  );
 }
 
-function deliveryMethodLabel(m: DeliveryMethod): string {
-  switch (m) {
-    case DeliveryMethod.email:
-      return "Email";
-    case DeliveryMethod.courier:
-      return "Courier";
-    case DeliveryMethod.physical:
-      return "Physical";
-    default:
-      return m;
-  }
-}
+const NOTICE_TYPES = [
+  "1st Demand Notice",
+  "Final Demand Notice",
+  "Statutory Notice",
+];
+const DELIVERY_METHODS = ["Email", "Courier", "Physical"];
+const DELIVERY_STATUSES = ["Pending", "Delivered", "Failed", "Returned"];
+const NOTICE_STATUSES = ["Active", "Expired", "Complied"];
 
-function noticeStatusBadge(s: NoticeStatus) {
-  switch (s) {
-    case NoticeStatus.active:
-      return (
-        <Badge className="bg-[oklch(0.65_0.18_142/0.2)] text-[oklch(0.82_0.16_142)] border-[oklch(0.65_0.18_142/0.4)] border">
-          Active
-        </Badge>
-      );
-    case NoticeStatus.expired:
-      return (
-        <Badge className="bg-[oklch(0.6_0.22_18/0.2)] text-[oklch(0.82_0.18_25)] border-[oklch(0.6_0.22_18/0.4)] border">
-          Expired
-        </Badge>
-      );
-    case NoticeStatus.complied:
-      return (
-        <Badge className="bg-[oklch(0.55_0.14_245/0.2)] text-[oklch(0.78_0.14_245)] border-[oklch(0.55_0.14_245/0.4)] border">
-          Complied
-        </Badge>
-      );
-    default:
-      return <Badge variant="outline">{s}</Badge>;
-  }
-}
+export default function NoticesTab({ caseId: _caseId }: Props) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    noticeId: "",
+    noticeType: "",
+    noticeSentDate: "",
+    noticeExpiryDate: "",
+    deliveryMethod: "",
+    deliveryStatus: "",
+    noticeStatus: "",
+  });
 
-export default function NoticesTab({ caseId }: Props) {
-  const { data: notices, isLoading } = useGetNotices(caseId);
+  const set = (key: string, val: string) =>
+    setForm((p) => ({ ...p, [key]: val }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await new Promise((r) => setTimeout(r, 600));
+    setIsSubmitting(false);
+    toast.success("Notice record submitted");
+  };
 
   return (
-    <Card className="bg-card border-border shadow-card">
-      <CardHeader className="pb-3 border-b border-border/50">
-        <CardTitle className="flex items-center gap-2 text-sm font-display font-bold">
-          <Bell className="w-4 h-4 text-primary" />
-          Notice Register
-          <span className="ml-auto text-xs font-normal text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
-            Read-only
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-3 p-0">
-        <Table data-ocid="notices.table">
-          <TableHeader>
-            <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider pl-4">
+    <form onSubmit={handleSubmit}>
+      <Card className="bg-white border-border shadow-sm">
+        <CardHeader className="pb-2 pt-3 px-4 border-b border-border/50">
+          <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
+            <Bell className="w-4 h-4 text-primary" />
+            Notice Register
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-3 px-4 pb-4">
+          <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Notice ID
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
+              </Label>
+              <Input
+                value={form.noticeId}
+                onChange={(e) => set("noticeId", e.target.value)}
+                placeholder="NTC-XXXX-XXXX"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
+                data-ocid="notices.input"
+              />
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Notice Type
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                Sent Date
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                Expiry Date
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                Delivery Method
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                Delivery Status
-              </TableHead>
-              <TableHead className="text-muted-foreground font-display font-semibold text-xs uppercase tracking-wider">
-                Notice Status
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading &&
-              NOTICE_SKEL_ROWS.map((rowKey) => (
-                <TableRow key={rowKey}>
-                  {NOTICE_SKEL_CELLS.map((cellKey) => (
-                    <TableCell key={cellKey}>
-                      <Skeleton className="h-4 w-20" />
-                    </TableCell>
+              </Label>
+              <Select
+                value={form.noticeType}
+                onValueChange={(v) => set("noticeType", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="notices.select"
+                >
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {NOTICE_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
                   ))}
-                </TableRow>
-              ))}
-            {!isLoading && (!notices || notices.length === 0) && (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="text-center py-12 text-muted-foreground"
-                  data-ocid="notices.empty_state"
+                </SelectContent>
+              </Select>
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Notice Sent Date
+              </Label>
+              <Input
+                type="date"
+                value={form.noticeSentDate}
+                onChange={(e) => set("noticeSentDate", e.target.value)}
+                className="bg-white border-border text-black font-normal h-7 text-xs [&::-webkit-datetime-edit]:font-normal [&::-webkit-datetime-edit-fields-wrapper]:font-normal"
+                data-ocid="notices.input"
+              />
+            </FieldCard>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Notice Expiry Date
+              </Label>
+              <Input
+                type="date"
+                value={form.noticeExpiryDate}
+                onChange={(e) => set("noticeExpiryDate", e.target.value)}
+                className="bg-white border-border text-black font-normal h-7 text-xs [&::-webkit-datetime-edit]:font-normal [&::-webkit-datetime-edit-fields-wrapper]:font-normal"
+                data-ocid="notices.input"
+              />
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Delivery Method
+              </Label>
+              <Select
+                value={form.deliveryMethod}
+                onValueChange={(v) => set("deliveryMethod", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="notices.select"
                 >
-                  <Bell className="w-6 h-6 mx-auto mb-2 opacity-30" />
-                  No notices recorded for this case
-                </TableCell>
-              </TableRow>
-            )}
-            {!isLoading &&
-              notices?.map((n, idx) => (
-                <TableRow
-                  key={n.noticeId}
-                  className="border-b border-border/50"
-                  data-ocid={`notices.row.${idx + 1}`}
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {DELIVERY_METHODS.map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldCard>
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Delivery Status
+              </Label>
+              <Select
+                value={form.deliveryStatus}
+                onValueChange={(v) => set("deliveryStatus", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="notices.select"
                 >
-                  <TableCell className="font-mono text-xs text-primary pl-4">
-                    {n.noticeId}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {noticeTypeLabel(n.noticeType)}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {formatDate(n.noticeSentDate)}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {formatDate(n.noticeExpiryDate)}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {deliveryMethodLabel(n.deliveryMethod)}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {n.deliveryStatus}
-                  </TableCell>
-                  <TableCell>{noticeStatusBadge(n.noticeStatus)}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {DELIVERY_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldCard>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5 mb-3">
+            <FieldCard>
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Notice Status
+              </Label>
+              <Select
+                value={form.noticeStatus}
+                onValueChange={(v) => set("noticeStatus", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="notices.select"
+                >
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {NOTICE_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldCard>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-primary text-primary-foreground font-normal h-8 text-sm"
+              data-ocid="notices.submit_button"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+              {isSubmitting ? "Submitting..." : "Submit Notice"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </form>
   );
 }

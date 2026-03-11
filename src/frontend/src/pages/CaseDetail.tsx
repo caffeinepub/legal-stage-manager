@@ -84,18 +84,18 @@ export default function CaseDetail({ caseId, onClose }: Props) {
           <div className="flex-1">
             {isLoading ? (
               <div className="space-y-2">
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-3.5 w-32" />
               </div>
             ) : caseData ? (
-              <div>
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-3">
-                  <h2 className="font-normal text-lg text-gray-900">
+                  <h2 className="font-semibold text-base text-gray-900">
                     {caseData.customerName}
                   </h2>
                   {getStatusBadge(caseData.status)}
                 </div>
-                <div className="flex items-center gap-4 mt-1">
+                <div className="flex items-center gap-5">
                   <span className="text-xs text-gray-500">
                     Case ID:{" "}
                     <span className="font-mono text-blue-600">
@@ -130,13 +130,13 @@ export default function CaseDetail({ caseId, onClose }: Props) {
 
       {/* Tab Bar */}
       <div className="border-b border-gray-200 bg-white px-6 flex-shrink-0">
-        <div className="flex items-center gap-1 py-2">
+        <div className="flex items-center gap-1 py-1.5">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-md text-sm font-normal transition-all ${
+              className={`px-3 py-1.5 rounded-md text-sm font-normal transition-all ${
                 activeTab === tab.id
                   ? "bg-gray-900 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
@@ -150,7 +150,7 @@ export default function CaseDetail({ caseId, onClose }: Props) {
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-5 py-3">
         {activeTab === "overview" && <OverviewTab caseId={caseId} />}
         {activeTab === "investigation" && <InvestigationTab caseId={caseId} />}
         {activeTab === "litigation" && <LitigationTab caseId={caseId} />}

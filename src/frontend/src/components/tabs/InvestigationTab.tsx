@@ -44,8 +44,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
   const handleFeedbackFile = (file: File | null) => {
     setFeedbackFile(file);
     if (file?.type.startsWith("image/")) {
-      const url = URL.createObjectURL(file);
-      setFeedbackPreview(url);
+      setFeedbackPreview(URL.createObjectURL(file));
     } else {
       setFeedbackPreview(null);
     }
@@ -63,9 +62,8 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
     ]);
   };
 
-  const removeDocument = (id: string) => {
+  const removeDocument = (id: string) =>
     setDocuments((prev) => prev.filter((d) => d.id !== id));
-  };
 
   const updateDocumentFile = (id: string, file: File | null) => {
     const previewUrl = file?.type.startsWith("image/")
@@ -90,15 +88,15 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
   return (
     <form onSubmit={handleSave}>
       <Card className="bg-white border-border shadow-sm">
-        <CardHeader className="pb-3 border-b border-border/50">
+        <CardHeader className="pb-2 pt-3 px-4 border-b border-border/50">
           <CardTitle className="flex items-center gap-2 text-sm font-normal text-foreground">
             <Search className="w-4 h-4 text-primary" />
             Customer Investigation
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-4 space-y-3">
-          {/* Row 1: Product | Account Number | Loan ID */}
-          <div className="grid grid-cols-3 gap-4">
+        <CardContent className="pt-3 px-4 pb-4 space-y-2">
+          {/* Row 1 */}
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Product
@@ -107,7 +105,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.product}
                 onChange={(e) => set("product", e.target.value)}
                 placeholder="e.g. Personal Loan"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
@@ -119,7 +117,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.accountNumber}
                 onChange={(e) => set("accountNumber", e.target.value)}
                 placeholder="e.g. ACC-0001234"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
@@ -131,14 +129,14 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.loanId}
                 onChange={(e) => set("loanId", e.target.value)}
                 placeholder="e.g. LN-20240001"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
           </div>
 
-          {/* Row 2: Legal ID | Legal Description | Omniflow Number */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Row 2 */}
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Legal ID
@@ -147,7 +145,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.legalId}
                 onChange={(e) => set("legalId", e.target.value)}
                 placeholder="e.g. LEG-00123"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
@@ -159,7 +157,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.legalDescription}
                 onChange={(e) => set("legalDescription", e.target.value)}
                 placeholder="Brief legal description"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
@@ -171,14 +169,14 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.omniflowNumber}
                 onChange={(e) => set("omniflowNumber", e.target.value)}
                 placeholder="e.g. OMF-00456"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
           </div>
 
-          {/* Row 3: Investigator | Feedback Description | Feedback Upload */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Row 3 */}
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Investigator
@@ -187,7 +185,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 value={form.investigator}
                 onChange={(e) => set("investigator", e.target.value)}
                 placeholder="Full name"
-                className="bg-white border-border text-black font-normal h-8 text-sm"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
                 data-ocid="investigation.input"
               />
             </div>
@@ -200,7 +198,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                 onChange={(e) => set("feedbackDescription", e.target.value)}
                 placeholder="Investigation feedback..."
                 rows={2}
-                className="bg-white border-border text-black font-normal resize-none text-sm"
+                className="bg-white border-border text-black font-normal resize-none text-xs"
                 data-ocid="investigation.textarea"
               />
             </div>
@@ -208,7 +206,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                 Feedback Upload
               </Label>
-              <div className="bg-white border border-border rounded-md p-2 space-y-1.5">
+              <div className="bg-white border border-border rounded-md p-2 space-y-1">
                 <input
                   ref={feedbackFileRef}
                   type="file"
@@ -223,7 +221,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                     <img
                       src={feedbackPreview}
                       alt="Feedback preview"
-                      className="w-full h-20 object-cover rounded border border-border/50"
+                      className="w-full h-16 object-cover rounded border border-border/50"
                     />
                     <button
                       type="button"
@@ -268,12 +266,12 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
             </div>
           </div>
 
-          {/* Document upload rows — white compact cards */}
-          <div className="space-y-2 pt-1">
+          {/* Document upload rows */}
+          <div className="space-y-1.5 pt-1">
             {documents.map((doc, idx) => (
               <div
                 key={doc.id}
-                className="bg-white border border-gray-100 rounded-md p-3 shadow-sm space-y-2"
+                className="bg-white border border-gray-100 rounded-md p-2.5 shadow-sm space-y-1.5"
               >
                 <div className="flex items-center justify-between">
                   <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
@@ -283,20 +281,19 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                     <button
                       type="button"
                       onClick={() => removeDocument(doc.id)}
-                      className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="p-0.5 rounded text-gray-400 hover:text-red-500"
                       data-ocid={`investigation.delete_button.${idx + 1}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
-                {/* Image preview */}
                 {doc.previewUrl && (
                   <div className="relative">
                     <img
                       src={doc.previewUrl}
-                      alt="Document preview"
-                      className="w-full h-24 object-cover rounded border border-border/50"
+                      alt="Preview"
+                      className="w-full h-16 object-cover rounded border border-border/50"
                     />
                     <button
                       type="button"
@@ -322,7 +319,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="w-full text-xs font-normal border-border h-8"
+                      className="w-full text-xs font-normal border-border h-7"
                       onClick={() =>
                         document.getElementById(`doc-file-${doc.id}`)?.click()
                       }
@@ -345,7 +342,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                         updateDocumentDescription(doc.id, e.target.value)
                       }
                       placeholder="Document description"
-                      className="bg-white border-border text-black font-normal h-8 text-sm"
+                      className="bg-white border-border text-black font-normal h-7 text-xs"
                       data-ocid="investigation.input"
                     />
                   </div>
@@ -357,7 +354,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
               variant="outline"
               size="sm"
               onClick={addDocument}
-              className="text-xs font-normal border-border h-8"
+              className="text-xs font-normal border-border h-7"
               data-ocid="investigation.add_button"
             >
               <Plus className="w-3 h-3 mr-1" />
@@ -365,11 +362,10 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
             </Button>
           </div>
 
-          {/* Save */}
           <div className="flex justify-end pt-1">
             <Button
               type="submit"
-              className="bg-primary text-primary-foreground font-normal"
+              className="bg-primary text-primary-foreground font-normal h-8 text-sm"
               data-ocid="investigation.save_button"
             >
               Save Investigation

@@ -20,7 +20,7 @@ export default function App() {
         >
           <div
             className="bg-white rounded-lg shadow-2xl overflow-hidden"
-            style={{ width: "90vw", height: "80vh" }}
+            style={{ width: "72vw", height: "90vh" }}
           >
             <CaseDetail
               caseId={selectedCaseId}
