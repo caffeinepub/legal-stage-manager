@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import AddCaseDialog from "../components/AddCaseDialog";
-import { useGetCases } from "../hooks/useQueries";
+import { useGetCases, useGetQueueEnrichment } from "../hooks/useQueries";
 import { formatCurrency } from "../lib/formatters";
 
 interface Props {
@@ -36,7 +36,84 @@ interface Props {
 }
 
 const SKEL_ROWS = ["r1", "r2", "r3", "r4", "r5"];
-const SKEL_CELLS = ["c0", "c1", "c2", "c3", "c4", "c5", "c6"];
+const SKEL_CELLS = [
+  "c0",
+  "c1",
+  "c2",
+  "c3",
+  "c4",
+  "c5",
+  "c6",
+  "c7",
+  "c8",
+  "c9",
+  "c10",
+  "c11",
+  "c12",
+  "c13",
+  "c14",
+  "c15",
+  "c16",
+];
+
+const TOTAL_COLS = 18;
+
+function formatShortDate(ts: bigint | undefined | null): string {
+  if (!ts) return "—";
+  const ms = Number(ts) / 1_000_000;
+  if (!ms || ms <= 0) return "—";
+  return new Date(ms).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getLegalStage(
+  caseStatus: string | undefined,
+  fallback: string,
+): string {
+  switch (caseStatus) {
+    case "filed":
+      return "Filed";
+    case "awaitingHearing":
+      return "Awaiting Hearing";
+    case "inTrial":
+      return "In Trial";
+    case "judgementIssued":
+      return "Judgment Issued";
+    default:
+      return fallback;
+  }
+}
+
+function getNextAction(caseStatus: string | undefined): string {
+  switch (caseStatus) {
+    case "filed":
+      return "Attend First Hearing";
+    case "awaitingHearing":
+      return "Attend Scheduled Hearing";
+    case "inTrial":
+      return "File Submissions";
+    case "judgementIssued":
+      return "Enforce Judgment";
+    default:
+      return "File Suit";
+  }
+}
+
+function getActionDate(
+  summonsDate: bigint | undefined,
+  hearingDate: bigint | undefined,
+): string {
+  const now = Date.now();
+  if (summonsDate) {
+    const ms = Number(summonsDate) / 1_000_000;
+    if (ms > now) return formatShortDate(summonsDate);
+  }
+  if (hearingDate) return formatShortDate(hearingDate);
+  return "—";
+}
 
 function getPriority(balance: number): "High" | "Medium" | "Low" {
   if (balance > 100000) return "High";
@@ -44,12 +121,13 @@ function getPriority(balance: number): "High" | "Medium" | "Low" {
   return "Low";
 }
 
+// Updated pill labels — 'All' → 'Workload', 'Settled' → 'Priority'
 const STATUS_PILLS = [
-  "All",
+  "Workload",
   "Active",
   "In Litigation",
   "Judgment Issued",
-  "Settled",
+  "Priority",
 ] as const;
 type StatusPill = (typeof STATUS_PILLS)[number];
 
@@ -92,13 +170,23 @@ export default function CaseQueue({ onSelectCase }: Props) {
   const { data: cases, isLoading } = useGetCases();
   const [addOpen, setAddOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusPill>("All");
+  const [statusFilter, setStatusFilter] = useState<StatusPill>("Workload");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-  // Compute counts from full cases array (not filtered)
+  const allCaseIds = useMemo(() => (cases ?? []).map((c) => c.caseId), [cases]);
+  const { data: enrichment } = useGetQueueEnrichment(allCaseIds);
+
   const statusCounts = useMemo(() => {
     if (!cases) return {} as Record<StatusPill, number>;
-    const counts: Record<string, number> = { All: cases.length };
+    // 'Workload' = all cases, 'Priority' = high priority cases
+    const all = cases.length;
+    const highPriority = cases.filter(
+      (c) => getPriority(c.outstandingBalance) === "High",
+    ).length;
+    const counts: Record<string, number> = {
+      Workload: all,
+      Priority: highPriority,
+    };
     for (const c of cases) {
       counts[c.status] = (counts[c.status] ?? 0) + 1;
     }
@@ -108,7 +196,12 @@ export default function CaseQueue({ onSelectCase }: Props) {
   const filtered = useMemo(() => {
     if (!cases) return [];
     let result = cases;
-    if (statusFilter !== "All")
+    // 'Workload' shows all; 'Priority' shows high priority cases
+    if (statusFilter === "Priority")
+      result = result.filter(
+        (c) => getPriority(c.outstandingBalance) === "High",
+      );
+    else if (statusFilter !== "Workload")
       result = result.filter((c) => c.status === statusFilter);
     if (priorityFilter !== "all")
       result = result.filter(
@@ -184,10 +277,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
           {/* Status filter pills */}
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             {STATUS_PILLS.map((pill) => {
-              const count =
-                pill === "All"
-                  ? (statusCounts.All ?? 0)
-                  : (statusCounts[pill] ?? 0);
+              const count = statusCounts[pill] ?? 0;
               const isSelected = statusFilter === pill;
               return (
                 <button
@@ -254,12 +344,12 @@ export default function CaseQueue({ onSelectCase }: Props) {
             </p>
           </div>
 
-          {/* Table — horizontal scroll, sticky actions column */}
+          {/* Table */}
           <div className="rounded border border-gray-200 bg-white overflow-hidden">
             <div className="overflow-x-auto">
               <Table
                 data-ocid="queue.table"
-                style={{ minWidth: "1260px", tableLayout: "fixed" }}
+                style={{ minWidth: "3200px", tableLayout: "fixed" }}
               >
                 <TableHeader>
                   <TableRow className="border-b border-gray-200 bg-gray-50 hover:bg-gray-50">
@@ -275,39 +365,105 @@ export default function CaseQueue({ onSelectCase }: Props) {
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal py-3"
-                      style={{ minWidth: "180px" }}
+                      style={{ minWidth: "160px" }}
                     >
-                      Case ID
+                      Legal ID
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "200px" }}
+                      style={{ minWidth: "150px" }}
+                    >
+                      Customer ID
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "180px" }}
                     >
                       Customer Name
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "180px" }}
+                      style={{ minWidth: "150px" }}
                     >
-                      Status
-                    </TableHead>
-                    <TableHead
-                      className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "180px" }}
-                    >
-                      Product
+                      Product Type
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal text-right"
-                      style={{ minWidth: "180px" }}
+                      style={{ minWidth: "160px" }}
                     >
-                      Outstanding
+                      Claim Amount
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal text-right"
+                      style={{ minWidth: "170px" }}
+                    >
+                      Claim Amount Filed
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "200px" }}
+                      style={{ minWidth: "160px" }}
                     >
-                      Assigned Agency
+                      Legal Stage
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "180px" }}
+                    >
+                      Court
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "160px" }}
+                    >
+                      Case Number
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "180px" }}
+                    >
+                      Assigned Law Firm
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "190px" }}
+                    >
+                      Next Legal Action
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "150px" }}
+                    >
+                      Action Date
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "150px" }}
+                    >
+                      Hearing
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal text-right"
+                      style={{ minWidth: "140px" }}
+                    >
+                      Days in Legal
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal text-right"
+                      style={{ minWidth: "160px" }}
+                    >
+                      Judgment Amount
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "150px" }}
+                    >
+                      Judgment Date
+                    </TableHead>
+                    <TableHead
+                      className="text-gray-400 text-xs font-normal"
+                      style={{ minWidth: "170px" }}
+                    >
+                      Enforcement Status
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -325,7 +481,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                   {!isLoading && filtered.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={TOTAL_COLS}
                         className="text-center py-16"
                         data-ocid="queue.empty_state"
                       >
@@ -348,51 +504,119 @@ export default function CaseQueue({ onSelectCase }: Props) {
                     </TableRow>
                   )}
                   {!isLoading &&
-                    filtered.map((c, idx) => (
-                      <TableRow
-                        key={c.caseId}
-                        className="hover:bg-gray-50 transition-colors border-b border-gray-100"
-                        data-ocid={`queue.row.${idx + 1}`}
-                      >
-                        <TableCell
-                          className="sticky left-0 z-10 bg-white border-r border-gray-100"
-                          style={{
-                            width: "160px",
-                            minWidth: "160px",
-                            boxShadow: "2px 0 4px rgba(0,0,0,0.06)",
-                          }}
+                    filtered.map((c, idx) => {
+                      const lit = enrichment?.litigation?.[c.caseId];
+                      const enf = enrichment?.enforcement?.[c.caseId];
+                      const legalStage = getLegalStage(
+                        lit?.caseStatus,
+                        c.status,
+                      );
+                      const nextAction = getNextAction(lit?.caseStatus);
+                      const actionDate = getActionDate(
+                        lit?.courtSummonsDate,
+                        lit?.hearingDate,
+                      );
+                      const hearing = formatShortDate(lit?.hearingDate);
+
+                      const claimAmountFiled =
+                        c.outstandingBalance > 0
+                          ? formatCurrency(c.outstandingBalance * 1.15)
+                          : "—";
+
+                      const daysInLegal = lit?.filingDate
+                        ? Math.floor(
+                            (Date.now() - Number(lit.filingDate) / 1_000_000) /
+                              86400000,
+                          )
+                        : null;
+
+                      const isJudgment = lit?.caseStatus === "judgementIssued";
+                      const judgmentAmount = isJudgment
+                        ? formatCurrency(c.outstandingBalance)
+                        : "—";
+                      const judgmentDate = isJudgment
+                        ? formatShortDate(lit?.hearingDate)
+                        : "—";
+
+                      return (
+                        <TableRow
+                          key={c.caseId}
+                          className="hover:bg-gray-50 transition-colors border-b border-gray-100"
+                          data-ocid={`queue.row.${idx + 1}`}
                         >
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="text-xs font-normal border-gray-200 text-gray-600 h-8 px-4"
-                            onClick={() => onSelectCase(c.caseId)}
-                            data-ocid={`queue.secondary_button.${idx + 1}`}
+                          <TableCell
+                            className="sticky left-0 z-10 bg-white border-r border-gray-100"
+                            style={{
+                              width: "160px",
+                              minWidth: "160px",
+                              boxShadow: "2px 0 4px rgba(0,0,0,0.06)",
+                            }}
                           >
-                            View Case
-                          </Button>
-                        </TableCell>
-                        <TableCell className="text-xs text-gray-700 font-normal">
-                          {c.caseId}
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-800 font-normal">
-                          {c.customerName}
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-700 font-normal">
-                          {c.status}
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-700 font-normal">
-                          {c.productType}
-                        </TableCell>
-                        <TableCell className="text-right text-sm text-gray-800 font-normal">
-                          {formatCurrency(c.outstandingBalance)}
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-600 font-normal">
-                          {c.assignedAgency}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="text-xs font-normal border-gray-200 text-gray-600 h-8 px-4"
+                              onClick={() => onSelectCase(c.caseId)}
+                              data-ocid={`queue.secondary_button.${idx + 1}`}
+                            >
+                              View Case
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-xs text-blue-600 font-normal">
+                            {c.caseId}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {c.customerNumber}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-800 font-normal">
+                            {c.customerName}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {c.productType}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-800 font-normal text-right">
+                            {formatCurrency(c.outstandingBalance)}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-800 font-normal text-right">
+                            {claimAmountFiled}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {legalStage}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {lit?.courtName ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {lit?.courtCaseNumber || "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-600 font-normal">
+                            {c.assignedAgency}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {nextAction}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {actionDate}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {hearing}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal text-right">
+                            {daysInLegal !== null ? `${daysInLegal}d` : "—"}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal text-right">
+                            {judgmentAmount}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-700 font-normal">
+                            {judgmentDate}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-600 font-normal">
+                            {enf?.status ?? "—"}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>

@@ -304,7 +304,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                     </button>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-2 items-end">
+                <div className="grid grid-cols-3 gap-2 items-end">
                   <div>
                     <input
                       type="file"
@@ -332,7 +332,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
                         : "Choose file"}
                     </Button>
                   </div>
-                  <div className="space-y-1">
+                  <div className="col-span-2 space-y-1">
                     <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
                       Description
                     </Label>
@@ -368,7 +368,7 @@ export default function InvestigationTab({ caseId: _caseId }: Props) {
               className="bg-primary text-primary-foreground font-normal h-8 text-sm"
               data-ocid="investigation.save_button"
             >
-              Save Investigation
+              Submit Investigation
             </Button>
           </div>
         </CardContent>

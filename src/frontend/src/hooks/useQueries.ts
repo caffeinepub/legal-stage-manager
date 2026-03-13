@@ -8,7 +8,7 @@ import {
 } from "../data/sampleData";
 import { useActor } from "./useActor";
 
-const SEED_KEY = "klp_seeded_v1";
+const SEED_KEY = "klp_seeded_v2";
 
 export function useSeedData() {
   const { actor, isFetching } = useActor();
@@ -110,6 +110,42 @@ export function useGetNotices(caseId: string) {
       return actor.getNotices(caseId);
     },
     enabled: !!actor && !isFetching && !!caseId,
+  });
+}
+
+export function useGetQueueEnrichment(caseIds: string[]) {
+  const { actor, isFetching } = useActor();
+  return useQuery({
+    queryKey: ["queue-enrichment", caseIds.join(",")],
+    queryFn: async () => {
+      if (!actor || caseIds.length === 0)
+        return {
+          litigation: {} as Record<string, LitigationRecord>,
+          enforcement: {} as Record<string, EnforcementRecord>,
+        };
+      const [litResults, enfResults] = await Promise.all([
+        Promise.allSettled(
+          caseIds.map((id) => actor.getLitigation(id).then((r) => ({ id, r }))),
+        ),
+        Promise.allSettled(
+          caseIds.map((id) =>
+            actor.getEnforcement(id).then((r) => ({ id, r })),
+          ),
+        ),
+      ]);
+      const litigation: Record<string, LitigationRecord> = {};
+      const enforcement: Record<string, EnforcementRecord> = {};
+      for (const res of litResults) {
+        if (res.status === "fulfilled" && res.value?.r)
+          litigation[res.value.id] = res.value.r;
+      }
+      for (const res of enfResults) {
+        if (res.status === "fulfilled" && res.value?.r)
+          enforcement[res.value.id] = res.value.r;
+      }
+      return { litigation, enforcement };
+    },
+    enabled: !!actor && !isFetching && caseIds.length > 0,
   });
 }
 

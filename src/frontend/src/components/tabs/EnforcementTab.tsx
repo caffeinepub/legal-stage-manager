@@ -65,9 +65,9 @@ export default function EnforcementTab({ caseId }: Props) {
     };
     try {
       await updateEnforcement.mutateAsync(record);
-      toast.success("Enforcement record saved");
+      toast.success("Enforcement record submitted");
     } catch {
-      toast.error("Failed to save enforcement record");
+      toast.error("Failed to submit enforcement record");
     }
   };
 
@@ -174,7 +174,7 @@ export default function EnforcementTab({ caseId }: Props) {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              {updateEnforcement.isPending ? "Saving..." : "Save Record"}
+              {updateEnforcement.isPending ? "Submitting..." : "Submit Record"}
             </Button>
           </div>
         </CardContent>

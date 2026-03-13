@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Calendar, Clock } from "lucide-react";
 import {
   useGetCase,
+  useGetEnforcement,
   useGetLitigation,
   useGetNotices,
 } from "../../hooks/useQueries";
@@ -103,6 +104,48 @@ const DAYS_PAST_DUE_MAP: Record<string, number> = {
   "CASE-2025-018": 88,
   "CASE-2025-019": 40,
   "CASE-2025-020": 260,
+};
+
+// Static upcoming due dates for cases without litigation records
+const STATIC_DUE_DATES_MAP: Record<
+  string,
+  { type: string; court: string; date: string }[]
+> = {
+  "CASE-2024-005": [
+    { type: "Mention", court: "Nairobi High Court", date: "18 Apr 2026" },
+  ],
+  "CASE-2024-006": [
+    {
+      type: "Hearing",
+      court: "Milimani Commercial Court",
+      date: "25 Apr 2026",
+    },
+  ],
+  "CASE-2024-008": [
+    { type: "Hearing", court: "Nairobi High Court", date: "02 May 2026" },
+  ],
+  "CASE-2024-009": [
+    { type: "Mention", court: "Kiambu Law Courts", date: "29 Mar 2026" },
+  ],
+  "CASE-2025-011": [
+    { type: "Hearing", court: "Nairobi High Court", date: "10 Apr 2026" },
+  ],
+  "CASE-2025-013": [
+    { type: "Mention", court: "Mombasa High Court", date: "22 Apr 2026" },
+  ],
+  "CASE-2025-015": [
+    { type: "Hearing", court: "Nairobi High Court", date: "05 May 2026" },
+  ],
+  "CASE-2025-017": [
+    { type: "Mention", court: "Nakuru Law Courts", date: "08 Apr 2026" },
+  ],
+  "CASE-2025-019": [
+    {
+      type: "Hearing",
+      court: "Milimani Commercial Court",
+      date: "14 Apr 2026",
+    },
+  ],
 };
 
 type TimelineEntry = {
@@ -294,51 +337,154 @@ function FieldRow({
   );
 }
 
+function getNextAction(caseStatus: string | undefined): string {
+  switch (caseStatus) {
+    case "filed":
+      return "Attend First Hearing";
+    case "awaitingHearing":
+      return "Attend Scheduled Hearing";
+    case "inTrial":
+      return "File Submissions";
+    case "judgementIssued":
+      return "Enforce Judgment";
+    default:
+      return "File Suit";
+  }
+}
+
+function getNextActionDate(
+  summonsDate: bigint | undefined,
+  hearingDate: bigint | undefined,
+): string {
+  const now = Date.now();
+  if (summonsDate) {
+    const ms = Number(summonsDate) / 1_000_000;
+    if (ms > now)
+      return new Date(ms).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+  }
+  if (hearingDate) {
+    const ms = Number(hearingDate) / 1_000_000;
+    return new Date(ms).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+  return "—";
+}
+
 export default function OverviewTab({ caseId }: Props) {
   const { data: caseData, isLoading: caseLoading } = useGetCase(caseId);
   const { data: litigation } = useGetLitigation(caseId);
   const { data: notices } = useGetNotices(caseId);
+  const { data: enforcement } = useGetEnforcement(caseId);
 
   type DueDate = {
-    label: string;
-    courtName: string;
-    date: bigint | undefined;
-    type: "court" | "hearing" | "notice";
+    type: string;
+    court: string;
+    dateStr: string;
+    sortKey: number;
   };
 
-  const baseDates: DueDate[] = [
-    {
-      label: "Mention Hearing",
-      courtName: litigation?.courtName ?? "",
-      date: litigation?.courtSummonsDate,
-      type: "court",
-    },
-    {
-      label: "Substantive Hearing",
-      courtName: litigation?.courtName ?? "",
-      date: litigation?.hearingDate,
-      type: "hearing",
-    },
-  ];
+  // Build upcoming due dates — show for ALL cases
+  const upcomingDates: DueDate[] = [];
 
-  const noticeDates: DueDate[] = (notices ?? [])
-    .filter((n) => n.noticeStatus === "active")
-    .map((n) => ({
-      label: `Notice Expiry — ${n.noticeId}`,
-      courtName: "Notice",
-      date: n.noticeExpiryDate,
-      type: "notice" as const,
-    }));
+  if (litigation?.courtSummonsDate) {
+    const ms = Number(litigation.courtSummonsDate) / 1_000_000;
+    upcomingDates.push({
+      type: "Mention",
+      court: litigation.courtName ?? "—",
+      dateStr: new Date(ms).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      sortKey: ms,
+    });
+  }
 
-  const upcomingDates = [...baseDates, ...noticeDates]
-    .filter((d) => d.date)
-    .sort((a, b) => Number(a.date!) - Number(b.date!));
+  if (litigation?.hearingDate) {
+    const ms = Number(litigation.hearingDate) / 1_000_000;
+    upcomingDates.push({
+      type: "Hearing",
+      court: litigation.courtName ?? "—",
+      dateStr: new Date(ms).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+      sortKey: ms,
+    });
+  }
+
+  // Notice expiry dates
+  for (const n of notices ?? []) {
+    if (n.noticeStatus === "active" && n.noticeExpiryDate) {
+      const ms = Number(n.noticeExpiryDate) / 1_000_000;
+      upcomingDates.push({
+        type: "Notice Expiry",
+        court: "Notices",
+        dateStr: new Date(ms).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        sortKey: ms,
+      });
+    }
+  }
+
+  // If no dynamic dates, fall back to static per-case dates
+  const staticDates = STATIC_DUE_DATES_MAP[caseId] ?? [];
+  if (upcomingDates.length === 0 && staticDates.length > 0) {
+    for (const sd of staticDates) {
+      upcomingDates.push({
+        type: sd.type,
+        court: sd.court,
+        dateStr: sd.date,
+        sortKey: 0,
+      });
+    }
+  }
+
+  upcomingDates.sort((a, b) => a.sortKey - b.sortKey);
 
   const dateAssigned = DATE_ASSIGNED_MAP[caseId] ?? "01 Jan 2024";
   const lastUpdated = LAST_UPDATED_MAP[caseId] ?? "01 Mar 2026";
   const loanAmount = LOAN_AMOUNT_MAP[caseId] ?? 0;
   const daysPastDue = DAYS_PAST_DUE_MAP[caseId] ?? 0;
   const timeline = CASE_TIMELINE_MAP[caseId] ?? DEFAULT_TIMELINE;
+
+  // Operational fields
+  const nextLegalAction = getNextAction(litigation?.caseStatus);
+  const nextActionDate = getNextActionDate(
+    litigation?.courtSummonsDate,
+    litigation?.hearingDate,
+  );
+  const claimAmountFiled = caseData
+    ? formatCurrency(caseData.outstandingBalance * 1.15)
+    : "—";
+  const daysInLegal = litigation?.filingDate
+    ? Math.floor(
+        (Date.now() - Number(litigation.filingDate) / 1_000_000) / 86400000,
+      )
+    : null;
+  const isJudgment = litigation?.caseStatus === "judgementIssued";
+  const judgmentAmount =
+    isJudgment && caseData ? formatCurrency(caseData.outstandingBalance) : "—";
+  const judgmentDate = isJudgment
+    ? litigation?.hearingDate
+      ? new Date(Number(litigation.hearingDate) / 1_000_000).toLocaleDateString(
+          "en-GB",
+          { day: "2-digit", month: "short", year: "numeric" },
+        )
+      : "—"
+    : "—";
+  const enforcementStatus = enforcement?.status ?? "—";
 
   if (caseLoading) {
     return (
@@ -364,7 +510,7 @@ export default function OverviewTab({ caseId }: Props) {
 
   return (
     <div className="space-y-3">
-      {/* Compact summary */}
+      {/* Customer summary */}
       <div className="bg-white border border-gray-200 rounded-md px-3 py-1">
         <FieldRow
           fields={[
@@ -399,6 +545,34 @@ export default function OverviewTab({ caseId }: Props) {
         />
       </div>
 
+      {/* Operational Fields */}
+      <div className="bg-white border border-gray-200 rounded-md px-3 py-1">
+        <FieldRow
+          fields={[
+            { label: "Next Legal Action", value: nextLegalAction },
+            { label: "Next Action Date", value: nextActionDate },
+            { label: "Claim Amount Filed", value: claimAmountFiled },
+          ]}
+        />
+        <FieldRow
+          fields={[
+            {
+              label: "Days in Legal",
+              value: daysInLegal !== null ? `${daysInLegal} days` : "—",
+            },
+            { label: "Judgment Amount", value: judgmentAmount },
+            { label: "Judgment Date", value: judgmentDate },
+          ]}
+        />
+        <FieldRow
+          fields={[
+            { label: "Enforcement Status", value: enforcementStatus },
+            { label: "", value: "" },
+            { label: "", value: "" },
+          ]}
+        />
+      </div>
+
       {/* Bottom panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Upcoming Due Dates */}
@@ -421,27 +595,39 @@ export default function OverviewTab({ caseId }: Props) {
               </p>
             ) : (
               <div>
+                {/* Column headers */}
+                <div className="grid grid-cols-3 gap-2 pb-1 border-b border-gray-100 mb-1">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">
+                    Type
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">
+                    Court / Jurisdiction
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 text-right">
+                    Date
+                  </span>
+                </div>
                 {upcomingDates.map((d, i) => (
-                  <div key={`due-${d.label}`}>
+                  <div key={`due-${d.type}-${i}`}>
                     {i > 0 && <Separator className="bg-border/40" />}
                     <div
-                      className="flex items-center justify-between py-2"
+                      className="grid grid-cols-3 gap-2 items-center py-2"
                       data-ocid={`overview.item.${i + 1}`}
                     >
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-blue-600" />
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Calendar className="w-3 h-3 flex-shrink-0 text-blue-600" />
                         <span className="text-xs text-black truncate">
-                          {d.label}
+                          {d.type}
                         </span>
                       </div>
                       <span
-                        className="text-xs px-2 truncate flex-1 text-center hidden sm:block"
+                        className="text-xs truncate"
                         style={{ color: "#6b7fae" }}
                       >
-                        {d.courtName}
+                        {d.court}
                       </span>
-                      <span className="text-xs flex-shrink-0 text-blue-600">
-                        {formatDate(d.date)}
+                      <span className="text-xs text-blue-600 text-right flex-shrink-0">
+                        {d.dateStr}
                       </span>
                     </div>
                   </div>

@@ -16,19 +16,6 @@ const d = (iso: string): bigint => BigInt(new Date(iso).getTime()) * 1_000_000n;
 
 export const sampleCases: Case[] = [
   {
-    caseId: "CASE-2024-001",
-    contractId: "CTR-78432",
-    customerName: "James Kariuki Mwangi",
-    customerNumber: "CUST-10045",
-    mobileNumber: "+254 722 456 789",
-    status: "In Litigation",
-    caseDescription: "Defaulted personal loan — 4 consecutive missed payments",
-    outstandingBalance: 47250.0,
-    omniflowNumber: "OFN-2024-3312",
-    productType: "Personal Loan",
-    assignedAgency: "Oraro & Company Advocates",
-  },
-  {
     caseId: "CASE-2024-002",
     contractId: "CTR-91205",
     customerName: "Grace Wanjiku Njoroge",
@@ -292,15 +279,6 @@ export const sampleCases: Case[] = [
 ];
 
 export const sampleLitigation: Record<string, LitigationRecord> = {
-  "CASE-2024-001": {
-    courtCaseNumber: "ELC/NRB/2024/1142",
-    filingDate: d("2024-08-15"),
-    courtName: "High Court — Environment & Land Court, Nairobi",
-    courtSummonsDate: d("2026-03-19"),
-    hearingDate: d("2026-04-02"),
-    caseStatus: LitigationStatus.awaitingHearing,
-    judgement: Judgement.none,
-  },
   "CASE-2024-004": {
     courtCaseNumber: "COMM/NRB/2024/0887",
     filingDate: d("2024-06-01"),
@@ -407,38 +385,6 @@ export const sampleEnforcement: Record<string, EnforcementRecord> = {
 };
 
 export const sampleNotices: Record<string, NoticeRecord[]> = {
-  "CASE-2024-001": [
-    {
-      noticeId: "NTF-001-A",
-      caseId: "CASE-2024-001",
-      noticeType: NoticeType.firstDemand,
-      noticeSentDate: d("2024-05-10"),
-      noticeExpiryDate: d("2024-06-10"),
-      deliveryMethod: DeliveryMethod.email,
-      deliveryStatus: "Delivered",
-      noticeStatus: NoticeStatus.expired,
-    },
-    {
-      noticeId: "NTF-001-B",
-      caseId: "CASE-2024-001",
-      noticeType: NoticeType.finalDemand,
-      noticeSentDate: d("2024-06-20"),
-      noticeExpiryDate: d("2024-07-20"),
-      deliveryMethod: DeliveryMethod.courier,
-      deliveryStatus: "Delivered",
-      noticeStatus: NoticeStatus.expired,
-    },
-    {
-      noticeId: "NTF-001-C",
-      caseId: "CASE-2024-001",
-      noticeType: NoticeType.statutory,
-      noticeSentDate: d("2026-02-01"),
-      noticeExpiryDate: d("2026-04-15"),
-      deliveryMethod: DeliveryMethod.physical,
-      deliveryStatus: "Delivered",
-      noticeStatus: NoticeStatus.active,
-    },
-  ],
   "CASE-2024-002": [
     {
       noticeId: "NTF-002-A",

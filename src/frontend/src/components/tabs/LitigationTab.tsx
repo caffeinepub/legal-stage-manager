@@ -136,9 +136,9 @@ export default function LitigationTab({ caseId }: Props) {
     };
     try {
       await updateLitigation.mutateAsync(record);
-      toast.success("Litigation record saved");
+      toast.success("Litigation record submitted");
     } catch {
-      toast.error("Failed to save litigation record");
+      toast.error("Failed to submit litigation record");
     }
   };
 
@@ -399,44 +399,29 @@ export default function LitigationTab({ caseId }: Props) {
 
           {/* Documents */}
           <div className="space-y-1 pt-1">
-            {documents.map((doc, idx) => (
-              <div
-                key={doc.id}
-                className="bg-white border border-gray-100 rounded-md p-1.5 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
-                    Document {documents.length > 1 ? idx + 1 : ""}
-                  </Label>
-                  {documents.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeDocument(doc.id)}
-                      className="p-0.5 rounded text-gray-400 hover:text-red-500"
-                      data-ocid={`litigation.delete_button.${idx + 1}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+            <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+              Documents
+            </Label>
+            <div className="space-y-1">
+              {documents.map((doc, idx) => (
+                <div key={doc.id}>
+                  {doc.previewUrl && (
+                    <div className="relative mb-1">
+                      <img
+                        src={doc.previewUrl}
+                        alt="Preview"
+                        className="w-full h-16 object-cover rounded border border-border/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateDocumentFile(doc.id, null)}
+                        className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow text-gray-500 hover:text-red-500"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
                   )}
-                </div>
-                {doc.previewUrl && (
-                  <div className="relative mb-1">
-                    <img
-                      src={doc.previewUrl}
-                      alt="Preview"
-                      className="w-full h-16 object-cover rounded border border-border/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => updateDocumentFile(doc.id, null)}
-                      className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow text-gray-500 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <div className="flex-shrink-0">
+                  <div className="flex items-center gap-2 w-full">
                     <input
                       type="file"
                       id={`lit-doc-file-${doc.id}`}
@@ -453,31 +438,41 @@ export default function LitigationTab({ caseId }: Props) {
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="text-xs font-normal border-border h-6 px-2"
+                      className="text-xs font-normal border-border h-7 w-1/3 flex-shrink-0 justify-start"
                       onClick={() => fileInputRefs.current[doc.id]?.click()}
                       data-ocid="litigation.upload_button"
                     >
-                      <Paperclip className="w-3 h-3 mr-1" />
-                      {doc.file
-                        ? doc.file.name.slice(0, 12) +
-                          (doc.file.name.length > 12 ? "…" : "")
-                        : "Choose file"}
+                      <Paperclip className="w-3 h-3 mr-1 flex-shrink-0" />
+                      <span className="truncate">
+                        {doc.file
+                          ? doc.file.name.slice(0, 14) +
+                            (doc.file.name.length > 14 ? "…" : "")
+                          : "Choose file"}
+                      </span>
                     </Button>
-                  </div>
-                  <div className="flex-1">
                     <Input
                       value={doc.description}
                       onChange={(e) =>
                         updateDocumentDescription(doc.id, e.target.value)
                       }
-                      placeholder="Description"
-                      className="bg-white border-border text-black font-normal h-6 text-xs"
+                      placeholder="Document description"
+                      className="bg-white border-border text-black font-normal h-7 text-xs flex-1 min-w-0"
                       data-ocid="litigation.input"
                     />
+                    {documents.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeDocument(doc.id)}
+                        className="flex-shrink-0 p-0.5 rounded text-gray-400 hover:text-red-500"
+                        data-ocid={`litigation.delete_button.${idx + 1}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <Button
               type="button"
               variant="outline"
@@ -503,7 +498,7 @@ export default function LitigationTab({ caseId }: Props) {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              {updateLitigation.isPending ? "Saving..." : "Save Record"}
+              {updateLitigation.isPending ? "Submitting..." : "Submit Record"}
             </Button>
           </div>
         </CardContent>
