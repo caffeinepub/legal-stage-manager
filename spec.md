@@ -1,33 +1,29 @@
 # NLS TECH - Kollect Lite Portal
 
 ## Current State
-- Case details open as a full page navigation (replaces queue view)
-- Status filter is a dropdown in the search/filter row
-- Priority filter dropdown remains
-- Sidebar has Dashboard, Cases, Reports, Settings sections
-- Sticky Actions column is 120px wide
-- Default tab in CaseDetail is always "overview"
+The Reports section has three tabs: Legal Progress, Compliance, and Recovery Performance. The Legal Progress tab currently shows KPI cards, a bar chart of cases by stage, and a summary table.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Floating modal overlay for case details (80vh, centered, background queue visible behind it)
-- Clickable status filter pills with counts immediately above the search bar
-- Default tab logic based on case status (In Litigation → litigation tab, Judgment Issued → litigation, Active → overview, etc.)
+- Priority highlighting: cases with claim amount above KES 500,000 get a visual highlight (e.g. a colored left border or badge) in the Legal Progress table
+- "Latest Update" column showing the most recent case update note per case
+- "Next Legal Action" column showing the immediate next procedural step
+- A dedicated "Priority" section or visual grouping that surfaces high-value cases prominently
 
 ### Modify
-- App.tsx: selectedCaseId state instead of page navigation; modal open/close handler; queue always rendered
-- CaseQueue.tsx: remove Status dropdown; add clickable status pills row above search bar; widen sticky Actions column to ~160px; open modal instead of navigating
-- CaseDetail.tsx: convert to modal variant with close button (X), no back button, scrollable content inside modal
-- AppLayout.tsx: sidebar nav stripped to only "Legal" section with "Legal Queue" link
+- Redesign the Legal Progress tab with a clean, aesthetic layout:
+  - Top: 4 KPI summary cards (Total in Legal, In Litigation, Judgments Issued, Priority Cases)
+  - Middle: A compact accounts table grouped or sorted by legal stage, with columns: Legal ID, Customer Name, Legal Stage, Litigation Status, Judgment Issued (Yes/No), Claim Amount, Latest Update (comment), Next Legal Action, Priority flag
+  - Priority cases (claim amount > KES 500,000) visually distinguished with a left accent border or subtle background tint
+  - Clean monochrome aesthetic matching the rest of the app; no colored pills
 
 ### Remove
-- Dashboard, Cases, Reports, Settings sidebar sections
-- Status dropdown from the filter row
-- Full-page navigation pattern for case details
+- The existing bar chart in Legal Progress (replaced by the redesigned layout)
 
 ## Implementation Plan
-1. Update App.tsx to hold selectedCaseId; render CaseDetail as overlay modal on top of CaseQueue
-2. Update CaseQueue.tsx: remove Status Select, add status pills row above search, widen Actions column
-3. Update CaseDetail.tsx: accept onClose prop, render as large modal (80vh, fixed centered overlay), default tab derived from case status
-4. Update AppLayout.tsx: sidebar shows only Legal > Legal Queue
+1. Update the LegalProgressTab component inside the Reports page
+2. Add helper to derive: latest case update note, next legal action, and priority flag (claim > 500,000) from seed data
+3. Render KPI cards: Total in Legal, In Litigation, Judgments Issued, Priority Cases
+4. Render accounts table with all required columns, sorted by legal stage, priority cases visually highlighted
+5. Remove old bar chart from Legal Progress tab only

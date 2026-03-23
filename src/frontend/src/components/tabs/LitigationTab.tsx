@@ -67,8 +67,11 @@ export default function LitigationTab({ caseId }: Props) {
     courtCaseNumber: "",
     filingDate: "",
     courtName: "",
-    courtSummonsDate: "",
-    hearingDate: "",
+    courtAction: "",
+    actionDate: "",
+    claimAmount: "",
+    nextAction: "",
+    nextActionDate: "",
     caseStatus: LitigationStatus.filed,
     judgement: Judgement.none,
     suitBy: "",
@@ -127,10 +130,6 @@ export default function LitigationTab({ caseId }: Props) {
       courtCaseNumber: form.courtCaseNumber,
       filingDate: form.filingDate ? parseDate(form.filingDate) : 0n,
       courtName: form.courtName,
-      courtSummonsDate: form.courtSummonsDate
-        ? parseDate(form.courtSummonsDate)
-        : undefined,
-      hearingDate: form.hearingDate ? parseDate(form.hearingDate) : undefined,
       caseStatus: form.caseStatus,
       judgement: form.judgement,
     };
@@ -213,24 +212,99 @@ export default function LitigationTab({ caseId }: Props) {
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
-                Court Summons Date
+                Court Action
+              </Label>
+              <Select
+                value={form.courtAction}
+                onValueChange={(v) => set("courtAction", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="litigation.select"
+                >
+                  <SelectValue placeholder="e.g. Hearing" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {[
+                    "Hearing",
+                    "Mention",
+                    "Pre-Trial Conference",
+                    "Ruling",
+                    "Judgment",
+                  ].map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Action Date
               </Label>
               <Input
                 type="date"
-                value={form.courtSummonsDate}
-                onChange={(e) => set("courtSummonsDate", e.target.value)}
+                value={form.actionDate}
+                onChange={(e) => set("actionDate", e.target.value)}
                 className={dateInputClass}
                 data-ocid="litigation.input"
               />
             </div>
             <div className="space-y-1">
               <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
-                Hearing Date
+                Claim Amount
+              </Label>
+              <Input
+                type="text"
+                value={form.claimAmount}
+                onChange={(e) => set("claimAmount", e.target.value)}
+                placeholder="KES 0.00"
+                className="bg-white border-border text-black font-normal h-7 text-xs"
+                data-ocid="litigation.input"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Next Action
+              </Label>
+              <Select
+                value={form.nextAction}
+                onValueChange={(v) => set("nextAction", v)}
+              >
+                <SelectTrigger
+                  className="bg-white border-border text-black font-normal h-7 text-xs"
+                  data-ocid="litigation.select"
+                >
+                  <SelectValue placeholder="e.g. 2nd Hearing" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {[
+                    "2nd Hearing",
+                    "Hearing",
+                    "Mention",
+                    "Pre-Trial Conference",
+                    "Ruling",
+                    "Judgment",
+                  ].map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-gray-400 uppercase tracking-wider font-normal">
+                Next Action Date
               </Label>
               <Input
                 type="date"
-                value={form.hearingDate}
-                onChange={(e) => set("hearingDate", e.target.value)}
+                value={form.nextActionDate}
+                onChange={(e) => set("nextActionDate", e.target.value)}
                 className={dateInputClass}
                 data-ocid="litigation.input"
               />

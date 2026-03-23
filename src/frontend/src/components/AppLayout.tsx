@@ -9,16 +9,26 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+type Page = "queue" | "reports";
+
 interface Props {
   children: React.ReactNode;
+  activePage: Page;
+  onNavigate: (page: Page) => void;
 }
 
-export default function AppLayout({ children }: Props) {
+export default function AppLayout({ children, activePage, onNavigate }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [legalExpanded, setLegalExpanded] = useState(true);
+  const [reportsExpanded, setReportsExpanded] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
 
   const sidebarWidth = sidebarOpen ? 260 : 0;
+
+  const activeItemClass =
+    "w-full text-left px-4 py-2 text-sm transition-colors rounded-l-none bg-[#5a3200] text-white font-semibold border-l-2 border-[#c19a51]";
+  const inactiveItemClass =
+    "w-full text-left px-4 py-2 text-sm transition-colors rounded-l-none text-white/70 hover:bg-[#5a3200] hover:text-white";
 
   return (
     <div className="min-h-screen bg-background font-body flex flex-col">
@@ -116,8 +126,9 @@ export default function AppLayout({ children }: Props) {
                 </div>
               </div>
 
-              {/* Navigation — Legal only */}
+              {/* Navigation */}
               <nav className="flex-1 overflow-y-auto py-2">
+                {/* Legal section */}
                 <div>
                   <button
                     type="button"
@@ -137,10 +148,69 @@ export default function AppLayout({ children }: Props) {
                     <div className="ml-4">
                       <button
                         type="button"
-                        className="w-full text-left px-4 py-2 text-sm transition-colors rounded-l-none bg-[#5a3200] text-white font-semibold border-l-2 border-[#c19a51]"
-                        data-ocid="sidebar.link"
+                        onClick={() => onNavigate("queue")}
+                        className={
+                          activePage === "queue"
+                            ? activeItemClass
+                            : inactiveItemClass
+                        }
+                        data-ocid="sidebar.queue.link"
                       >
                         Legal Queue
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Reports section */}
+                <div className="mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setReportsExpanded((v) => !v)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-white hover:bg-[#5a3200] transition-colors group"
+                  >
+                    <span className="font-display font-bold text-sm">
+                      Reports
+                    </span>
+                    {reportsExpanded ? (
+                      <ChevronDown className="w-3.5 h-3.5 text-white/60" />
+                    ) : (
+                      <ChevronRight className="w-3.5 h-3.5 text-white/60" />
+                    )}
+                  </button>
+                  {reportsExpanded && (
+                    <div className="ml-4">
+                      <button
+                        type="button"
+                        onClick={() => onNavigate("reports")}
+                        className={
+                          activePage === "reports"
+                            ? activeItemClass
+                            : inactiveItemClass
+                        }
+                        data-ocid="sidebar.reports.legal_progress.link"
+                      >
+                        Legal Progress
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate("reports")}
+                        className={
+                          activePage === "reports"
+                            ? inactiveItemClass
+                            : inactiveItemClass
+                        }
+                        data-ocid="sidebar.reports.compliance.link"
+                      >
+                        Compliance
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate("reports")}
+                        className={inactiveItemClass}
+                        data-ocid="sidebar.reports.recovery.link"
+                      >
+                        Recovery Performance
                       </button>
                     </div>
                   )}

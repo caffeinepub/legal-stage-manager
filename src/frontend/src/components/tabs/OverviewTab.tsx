@@ -106,11 +106,34 @@ const DAYS_PAST_DUE_MAP: Record<string, number> = {
   "CASE-2025-020": 260,
 };
 
+// Parse a date string like "18 Apr 2026" into a timestamp for sorting
+function parseDateStr(dateStr: string): number {
+  const d = new Date(dateStr);
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+}
+
 // Static upcoming due dates for cases without litigation records
+// Sorted soonest-first per case so first record appears first
 const STATIC_DUE_DATES_MAP: Record<
   string,
   { type: string; court: string; date: string }[]
 > = {
+  "CASE-2024-002": [
+    {
+      type: "Mention",
+      court: "Milimani Commercial Court",
+      date: "02 Apr 2026",
+    },
+    {
+      type: "Hearing",
+      court: "Milimani Commercial Court",
+      date: "28 May 2026",
+    },
+  ],
+  "CASE-2024-003": [
+    { type: "Hearing", court: "Nairobi High Court", date: "10 Apr 2026" },
+    { type: "Mention", court: "Nairobi High Court", date: "20 Jun 2026" },
+  ],
   "CASE-2024-005": [
     { type: "Mention", court: "Nairobi High Court", date: "18 Apr 2026" },
   ],
@@ -130,14 +153,30 @@ const STATIC_DUE_DATES_MAP: Record<
   "CASE-2025-011": [
     { type: "Hearing", court: "Nairobi High Court", date: "10 Apr 2026" },
   ],
+  "CASE-2025-012": [
+    { type: "Mention", court: "Mombasa High Court", date: "15 Apr 2026" },
+    { type: "Hearing", court: "Mombasa High Court", date: "05 Jun 2026" },
+  ],
   "CASE-2025-013": [
     { type: "Mention", court: "Mombasa High Court", date: "22 Apr 2026" },
+  ],
+  "CASE-2025-014": [
+    { type: "Hearing", court: "Nairobi High Court", date: "30 Mar 2026" },
+    { type: "Mention", court: "Nairobi High Court", date: "18 May 2026" },
   ],
   "CASE-2025-015": [
     { type: "Hearing", court: "Nairobi High Court", date: "05 May 2026" },
   ],
+  "CASE-2025-016": [
+    { type: "Mention", court: "Kisumu High Court", date: "20 Apr 2026" },
+    { type: "Hearing", court: "Kisumu High Court", date: "12 Jun 2026" },
+  ],
   "CASE-2025-017": [
     { type: "Mention", court: "Nakuru Law Courts", date: "08 Apr 2026" },
+  ],
+  "CASE-2025-018": [
+    { type: "Hearing", court: "Nairobi High Court", date: "25 Apr 2026" },
+    { type: "Mention", court: "Nairobi High Court", date: "15 Jun 2026" },
   ],
   "CASE-2025-019": [
     {
@@ -145,6 +184,10 @@ const STATIC_DUE_DATES_MAP: Record<
       court: "Milimani Commercial Court",
       date: "14 Apr 2026",
     },
+  ],
+  "CASE-2025-020": [
+    { type: "Mention", court: "Nakuru Law Courts", date: "18 Apr 2026" },
+    { type: "Hearing", court: "Nakuru Law Courts", date: "08 Jun 2026" },
   ],
 };
 
@@ -390,7 +433,7 @@ export default function OverviewTab({ caseId }: Props) {
     sortKey: number;
   };
 
-  // Build upcoming due dates — show for ALL cases
+  // Build upcoming due dates — show for ALL cases, sorted soonest first
   const upcomingDates: DueDate[] = [];
 
   if (litigation?.courtSummonsDate) {
@@ -439,6 +482,7 @@ export default function OverviewTab({ caseId }: Props) {
   }
 
   // If no dynamic dates, fall back to static per-case dates
+  // Parse static date strings so they sort correctly (soonest first)
   const staticDates = STATIC_DUE_DATES_MAP[caseId] ?? [];
   if (upcomingDates.length === 0 && staticDates.length > 0) {
     for (const sd of staticDates) {
@@ -446,11 +490,12 @@ export default function OverviewTab({ caseId }: Props) {
         type: sd.type,
         court: sd.court,
         dateStr: sd.date,
-        sortKey: 0,
+        sortKey: parseDateStr(sd.date),
       });
     }
   }
 
+  // Sort ascending: soonest upcoming date appears first
   upcomingDates.sort((a, b) => a.sortKey - b.sortKey);
 
   const dateAssigned = DATE_ASSIGNED_MAP[caseId] ?? "01 Jan 2024";
@@ -473,17 +518,6 @@ export default function OverviewTab({ caseId }: Props) {
         (Date.now() - Number(litigation.filingDate) / 1_000_000) / 86400000,
       )
     : null;
-  const isJudgment = litigation?.caseStatus === "judgementIssued";
-  const judgmentAmount =
-    isJudgment && caseData ? formatCurrency(caseData.outstandingBalance) : "—";
-  const judgmentDate = isJudgment
-    ? litigation?.hearingDate
-      ? new Date(Number(litigation.hearingDate) / 1_000_000).toLocaleDateString(
-          "en-GB",
-          { day: "2-digit", month: "short", year: "numeric" },
-        )
-      : "—"
-    : "—";
   const enforcementStatus = enforcement?.status ?? "—";
 
   if (caseLoading) {
@@ -560,14 +594,7 @@ export default function OverviewTab({ caseId }: Props) {
               label: "Days in Legal",
               value: daysInLegal !== null ? `${daysInLegal} days` : "—",
             },
-            { label: "Judgment Amount", value: judgmentAmount },
-            { label: "Judgment Date", value: judgmentDate },
-          ]}
-        />
-        <FieldRow
-          fields={[
             { label: "Enforcement Status", value: enforcementStatus },
-            { label: "", value: "" },
             { label: "", value: "" },
           ]}
         />

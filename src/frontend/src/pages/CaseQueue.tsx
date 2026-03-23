@@ -124,7 +124,7 @@ function getPriority(balance: number): "High" | "Medium" | "Low" {
 // Updated pill labels — 'All' → 'Workload', 'Settled' → 'Priority'
 const STATUS_PILLS = [
   "Workload",
-  "Active",
+  "Enforcement",
   "In Litigation",
   "Judgment Issued",
   "Priority",
@@ -201,6 +201,8 @@ export default function CaseQueue({ onSelectCase }: Props) {
       result = result.filter(
         (c) => getPriority(c.outstandingBalance) === "High",
       );
+    else if (statusFilter === "Enforcement")
+      result = result.filter((c) => c.status.toLowerCase().includes("enforce"));
     else if (statusFilter !== "Workload")
       result = result.filter((c) => c.status === statusFilter);
     if (priorityFilter !== "all")
@@ -407,13 +409,13 @@ export default function CaseQueue({ onSelectCase }: Props) {
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "180px" }}
+                      style={{ minWidth: "220px" }}
                     >
                       Court
                     </TableHead>
                     <TableHead
                       className="text-gray-400 text-xs font-normal"
-                      style={{ minWidth: "160px" }}
+                      style={{ minWidth: "200px" }}
                     >
                       Case Number
                     </TableHead>
@@ -563,7 +565,7 @@ export default function CaseQueue({ onSelectCase }: Props) {
                               View Case
                             </Button>
                           </TableCell>
-                          <TableCell className="text-xs text-blue-600 font-normal">
+                          <TableCell className="text-xs text-gray-900 font-normal">
                             {c.caseId}
                           </TableCell>
                           <TableCell className="text-xs text-gray-700 font-normal">
